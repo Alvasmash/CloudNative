@@ -32,8 +32,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *          codigos HTTP exactos exigidos por la rbrica (200, 201, 401, 403, 204)
  *          tanto en escenarios annimos, autenticados, con scope y con rol ADMIN.
  */
+import org.springframework.context.annotation.Import;
+
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
 @AutoConfigureMockMvc
+@Import(Pedidos360SecurityAndApiTests.TestSecurityConfig.class)
 class Pedidos360SecurityAndApiTests {
 
     @Autowired
@@ -56,6 +59,18 @@ class Pedidos360SecurityAndApiTests {
                             "aud", List.of("api://pedidos360-api")
                     )
             );
+        }
+
+        @Bean
+        @Primary
+        org.springframework.amqp.rabbit.core.RabbitTemplate testRabbitTemplate() {
+            return org.mockito.Mockito.mock(org.springframework.amqp.rabbit.core.RabbitTemplate.class);
+        }
+
+        @Bean
+        @Primary
+        org.springframework.amqp.rabbit.core.RabbitAdmin testRabbitAdmin() {
+            return org.mockito.Mockito.mock(org.springframework.amqp.rabbit.core.RabbitAdmin.class);
         }
     }
 

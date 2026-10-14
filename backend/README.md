@@ -1,124 +1,117 @@
-# Pedidos360 - Backend REST API (Evaluacion Parcial N° 1)
+# Pedidos360 - Backend REST API & Mensajeria RabbitMQ (Evaluacion Parcial N° 3)
 **Asignatura:** Desarrollo Cloud Native I (DSY1107)  
 **Seccion:** 002D  
-**Tecnologias:** Java 21  Spring Boot 3.4  Spring Security  OAuth2 Resource Server (Azure AD)  Spring Data JPA  H2 Database / AWS RDS
+**Tecnologias:** Java 21 | Spring Boot 3.4 | Spring AMQP (RabbitMQ) | Spring Security | OAuth2 Resource Server (Azure AD) | Spring Data JPA | H2 / PostgreSQL
 
 ---
 
-## 1. Cmo se Prende el Backend? (Gua Paso a Paso)
+## 1. Como se Enciende el Backend y RabbitMQ? (Guia Paso a Paso)
 
 ### Requisitos Previos
-Asegurate de tener instalados en tu computador:
-1. **Java JDK 21** o superior. Verifica con:
+1. **Java JDK 21** o superior:
    ```bash
    java -version
    ```
-2. **Apache Maven 3.8+**. Verifica con:
+2. **Apache Maven 3.8+**:
    ```bash
    mvn -version
    ```
+3. **Docker** (para encender RabbitMQ localmente):
+   ```bash
+   docker run -d --name rabbitmq-pedidos360 -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+   ```
+   - Panel web de RabbitMQ: [http://localhost:15672](http://localhost:15672) (Usuario: `guest`, Password: `guest`).
 
 ---
 
-### Paso 1: Abrir la terminal en la carpeta del backend
-En tu Visual Studio Code, abre una nueva terminal (PowerShell o CMD) y entra a la carpeta `backend`:
+### Paso 1: Abrir la terminal en la carpeta backend
 ```powershell
 cd backend
 ```
 
-### Paso 2: Ejecutar los tests unitarios y de seguridad
-Para comprobar que todo el codigo compila y pasa las pruebas de la rbrica al 100%:
+### Paso 2: Ejecutar los tests automatizados (36 tests)
 ```powershell
-mvn clean test
+mvn test
 ```
-*(Debe mostrar `BUILD SUCCESS` con 10 tests aprobados).*
+*(Debe reportar `BUILD SUCCESS` con 36 tests aprobados, abarcando seguridad, pedidos, mensajeria, ACK/NACK, reintentos, DLQ y administracion REST).*
 
-### Paso 3: Encender el servidor Spring Boot
-Para prender el backend en tu mquina local:
+### Paso 3: Iniciar el servidor Spring Boot
 ```powershell
 mvn spring-boot:run
 ```
-
-Listo! El servidor se iniciar en el puerto **8080** (`http://localhost:8080`). Vers el logo de Spring Boot y el mensaje:
-```text
-Started Pedidos360BackendApplication in X.XXX seconds
-```
-
-Para apagar el servidor en cualquier momento, presiona `Ctrl + C` en la terminal.
+El servidor estara disponible en el puerto **8080** (`http://localhost:8080`).
 
 ---
 
-## 2. Comandos utiles de Maven
+## 2. Arquitectura de Mensajeria RabbitMQ (EP3)
 
-| Comando | Para que sirve |
-|---|---|
-| `mvn spring-boot:run` | **Prende el servidor** en modo desarrollo (`http://localhost:8080`). |
-| `mvn clean test` | **Ejecuta las 10 pruebas automatizadas** de seguridad y persistencia. |
-| `mvn clean package` | **Compila y genera el archivo JAR** ejecutable dentro de `target/` (ideal para desplegar en AWS EC2). |
-| `java -jar target/pedidos360-backend-0.0.1-SNAPSHOT.jar` | **Corre el backend directamente desde el JAR compilado**. |
-
----
-
-## 3. Cmo Probar que el Backend esta Funcionando?
-
-### A. Prueba Rpida en el Navegador
-Abre tu navegador web y visita:
-- **Salud del sistema:** [http://localhost:8080/public/health](http://localhost:8080/public/health)
-  - Respuesta esperada: `{"status":"UP","system":"Pedidos360 Backend - Seccion 002D","access":"public"}`
-- **Catalogo de productos:** [http://localhost:8080/public/productos](http://localhost:8080/public/productos)
-  - Respuesta esperada: La lista completa de pizzas, hamburguesas y bebidas cargadas desde `data.sql`.
-- **Consola de Base de Datos H2:** [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
-  - JDBC URL: `jdbc:h2:mem:pedidosdb`
-  - Usuario: `sa`
-  - Password: *(en blanco)*
+### Topologia Centralizada (`RabbitMQConstants`)
+- **Exchanges:**
+  - `pedidos.exchange` (Topic): Exchange principal para publicar eventos de pedidos (`pedido.creado`, `pedido.*`).
+  - `pedidos.retry.exchange` (Direct): Exchange para enrutar mensajes a la cola de reintentos con TTL.
+  - `pedidos.dlx` (Direct): Dead Letter Exchange para mensajes descartados o con reintentos agotados.
+- **Colas:**
+  - `pedidos.pedido-creado.queue`: Cola durable principal donde los consumidores procesan los pedidos.
+  - `pedidos.pedido-creado.retry.queue`: Cola durable con TTL de 5000 ms y dead-letter routing hacia `pedidos.exchange`.
+  - `pedidos.pedido-creado.dlq`: Dead Letter Queue para inspeccion de mensajes fallidos con cabeceras de diagnostico.
+  - `pedidos.auditoria.queue`: Cola de auditoria de eventos de negocio.
+- **Politica de ACK/NACK, Reintentos y DLQ:**
+  - **Confirmacion manual:** Los listeners operan bajo `AcknowledgeMode.MANUAL`.
+  - **ACK:** Se confirma tras el procesamiento exitoso con `channel.basicAck(deliveryTag, false)`.
+  - **Reintentos:** Ante error recuperable con `x-retry-count < 3`, se incrementa la cabecera y se enruta a `pedidos.retry.exchange` con TTL. Al cumplirse el tiempo, RabbitMQ lo devuelve a la cola principal sin ciclos infinitos.
+  - **DLQ:** Al alcanzar `x-retry-count >= 3` o ante eventos invalidos irrecuperables, se envia al DLX con cabeceras `x-exception-message`, `x-exception-type` y `x-timestamp`, confirmando el original para sacarlo de la cola.
 
 ---
 
-### B. Pruebas de Seguridad (Desde Visual Studio Code)
-Abre el archivo `requests.http` en tu VS Code (con la extensin **REST Client** de Huachao Mao instalada). Vers un botn interactivo llamado **Send Request** sobre cada consulta:
+## 3. Matriz Completa de Endpoints y Seguridad
 
-1. **Caso Publico (200 OK):** Consulta `GET /public/productos` sin credenciales.
-2. **Caso Protegido sin Token (401 Unauthorized):** Consulta `GET /api/pedidos` sin token -> El backend responde `401` con JSON estructurado.
-3. **Caso Token Invalido (401 Unauthorized):** Enviaa un token falso -> El backend valida la firma criptogrfica y lo rechaza con `401`.
-4. **Caso Token Valido sin Scope (403 Forbidden):** Intenta hacer `POST /api/pedidos` sin el scope `recurso.write` -> Responde `403`.
-5. **Caso Token Valido con Scope (201 Created):** Enviaa el token con `recurso.write` -> Descuenta stock y crea la orden con `201 Created`.
-6. **Caso Admin (200 OK con ROLE_ADMIN / 403 sin l):** Consulta `GET /api/admin/pedidos`.
-
----
-
-## 4. Matriz de Endpoints y Seguridad
-
-| Mtodo | Ruta | Acceso Requerido | Codigo Esperado |
-|---|---|---|---|
-| `GET` | `/public/health` | Publico (sin token) | `200 OK` |
-| `GET` | `/public/productos` | Publico (sin token) | `200 OK` |
-| `GET` | `/public/productos/{id}` | Publico (sin token) | `200 OK` / `404` |
-| `GET` | `/api/profile` | Autenticado | `200 OK` / `401` |
-| `GET` | `/api/pedidos` | Autenticado | `200 OK` / `401` |
-| `GET` | `/api/pedidos/{id}` | Autenticado | `200 OK` / `401` / `404` |
-| `POST` | `/api/pedidos` | Requiere scope `recurso.write` | `201 Created` / `403` |
-| `GET` | `/api/admin/pedidos` | Requiere App Role `ROLE_ADMIN` | `200 OK` / `403` |
-| `PATCH` | `/api/admin/pedidos/{id}/estado` | Requiere App Role `ROLE_ADMIN` | `200 OK` / `403` / `404` |
-| `DELETE` | `/api/admin/pedidos/{id}` | Requiere App Role `ROLE_ADMIN` | `204 No Content` / `403` |
+| Metodo | Ruta | Acceso Requerido | Codigo Esperado | Descripcion |
+|---|---|---|---|---|
+| `GET` | `/public/health` | Publico (sin token) | `200 OK` | Salud del backend |
+| `GET` | `/public/productos` | Publico (sin token) | `200 OK` | Catalogo de productos |
+| `GET` | `/public/productos/{id}` | Publico (sin token) | `200 OK` / `404` | Detalle de producto |
+| `GET` | `/api/profile` | Autenticado | `200 OK` / `401` | Perfil y roles del JWT |
+| `GET` | `/api/pedidos` | Autenticado | `200 OK` / `401` | Historial de compras |
+| `POST` | `/api/pedidos` | Scope `recurso.write` | `201 Created` / `403` | Crea pedido y publica en RabbitMQ |
+| `GET` | `/api/admin/pedidos` | App Role `ROLE_ADMIN` | `200 OK` / `403` | Metricas y listado de pedidos |
+| `DELETE` | `/api/admin/pedidos/{id}` | App Role `ROLE_ADMIN` | `204 No Content` / `403` | Cancelar pedido |
+| `GET` | `/api/admin/rabbitmq/status` | App Role `ROLE_ADMIN` | `200 OK` / `403` | Estado y metricas de conexion a RabbitMQ |
+| `GET` | `/api/admin/rabbitmq/queues` | App Role `ROLE_ADMIN` | `200 OK` / `403` | Listar todas las colas administradas |
+| `GET` | `/api/admin/rabbitmq/queues/{name}` | App Role `ROLE_ADMIN` | `200 OK` / `404` | Detalle y metricas en vivo de cola |
+| `POST` | `/api/admin/rabbitmq/queues` | App Role `ROLE_ADMIN` | `201 Created` / `400` | Crear cola (validada con Bean Validation) |
+| `DELETE` | `/api/admin/rabbitmq/queues/{name}` | App Role `ROLE_ADMIN` | `204` / `409 Conflict` | Eliminar cola (protege colas criticas) |
+| `POST` | `/api/admin/rabbitmq/queues/{name}/purge` | App Role `ROLE_ADMIN` | `200 OK` / `404` | Purgar mensajes de una cola |
+| `GET` | `/api/admin/rabbitmq/exchanges` | App Role `ROLE_ADMIN` | `200 OK` / `403` | Listar exchanges administrados |
+| `POST` | `/api/admin/rabbitmq/exchanges` | App Role `ROLE_ADMIN` | `201 Created` / `400` | Crear exchange (direct, topic, fanout, headers) |
+| `DELETE` | `/api/admin/rabbitmq/exchanges/{name}` | App Role `ROLE_ADMIN` | `204` / `409 Conflict` | Eliminar exchange (protege exchanges criticos) |
+| `GET` | `/api/admin/rabbitmq/bindings` | App Role `ROLE_ADMIN` | `200 OK` / `403` | Listar enlaces activos |
+| `POST` | `/api/admin/rabbitmq/bindings` | App Role `ROLE_ADMIN` | `201 Created` / `404` | Crear binding (valida existencia previa) |
+| `DELETE` | `/api/admin/rabbitmq/bindings` | App Role `ROLE_ADMIN` | `204 No Content` / `409` | Eliminar binding |
 
 ---
 
-## 5. Variables de Entorno (Configuracion Cloud)
+## 4. Variables de Entorno (12-Factor App)
 
-El backend sigue las buenas practicas **12-Factor App**: toda la configuracion sensible se puede sobreescribir con variables de entorno sin tocar el codigo Java.
+Toda la configuracion sensible y de infraestructura se parametriza mediante variables de entorno:
 
-| Variable | Descripcin | Valor por Defecto |
+| Variable | Descripcion | Valor por Defecto |
 |---|---|---|
-| `JWT_ISSUER` | URL de Microsoft Entra ID / Azure AD | `https://login.microsoftonline.com/common/v2.0` |
-| `JWT_AUDIENCE` | Audiencia / Client ID de la API | `api://pedidos360-api` |
-| `ALLOWED_ORIGINS` | Orgenes permitidos para CORS (Angular) | `http://localhost:4200,http://localhost:5173` |
-| `SPRING_DATASOURCE_URL` | Conexin a Base de Datos (ej: AWS RDS) | `jdbc:h2:mem:pedidosdb` |
+| `SPRING_RABBITMQ_HOST` | Host del broker RabbitMQ | `localhost` |
+| `SPRING_RABBITMQ_PORT` | Puerto de conexion AMQP | `5672` |
+| `SPRING_RABBITMQ_USERNAME` | Usuario de RabbitMQ | `guest` |
+| `SPRING_RABBITMQ_PASSWORD` | Contrasena de RabbitMQ | `guest` |
+| `SPRING_RABBITMQ_VIRTUAL_HOST` | Virtual Host de RabbitMQ | `/` |
+| `JWT_ISSUER` | URL del emisor de Microsoft Entra ID | `https://login.microsoftonline.com/common/v2.0` |
+| `JWT_AUDIENCE` | Client ID / Audiencia de la API | `api://pedidos360-api` |
+| `ALLOWED_ORIGINS` | Origenes habilitados para CORS | `http://localhost:4200,http://localhost:5173` |
+| `SPRING_DATASOURCE_URL` | URL JDBC de base de datos | `jdbc:h2:mem:pedidosdb` |
 | `SPRING_DATASOURCE_USERNAME` | Usuario de base de datos | `sa` |
-| `SPRING_DATASOURCE_PASSWORD` | Contrasea de base de datos | *(vacioo)* |
+| `SPRING_DATASOURCE_PASSWORD` | Contrasena de base de datos | *(vacia)* |
 
-### Ejemplo: Cmo pasar variables en PowerShell antes de iniciar
-```powershell
-$env:JWT_ISSUER="https://login.microsoftonline.com/TU_TENANT_ID/v2.0"
-$env:JWT_AUDIENCE="api://TU_API_CLIENT_ID"
-mvn spring-boot:run
-```
+---
+
+## 5. Como Probar los Endpoints de RabbitMQ?
+
+1. Abre el archivo `requests.http` en Visual Studio Code (con la extension **REST Client** instalada).
+2. Asigna tu token con rol `ROLE_ADMIN` en la variable `@token`.
+3. Haz clic en **Send Request** en cualquiera de las consultas bajo la seccion `5. ADMINISTRACION DE RABBITMQ`.

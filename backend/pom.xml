@@ -75,10 +75,23 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Spring Boot AMQP (RabbitMQ): Colas, Exchanges, Bindings y procesamiento asincrono de mensajeria -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+
     <!-- Testing: Herramientas para ejecutar pruebas automatizadas (JUnit 5, MockMvc) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Spring Rabbit Test: Herramientas y utilidades para pruebas de RabbitMQ -->
+    <dependency>
+      <groupId>org.springframework.amqp</groupId>
+      <artifactId>spring-rabbit-test</artifactId>
       <scope>test</scope>
     </dependency>
 

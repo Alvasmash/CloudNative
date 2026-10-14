@@ -72,3 +72,88 @@ Content-Type: application/json
 GET {{baseUrl}}/api/admin/pedidos
 Authorization: Bearer {{token}}
 Accept: application/json
+
+### -------------------------------------------------------------------------
+### 5. ADMINISTRACION DE RABBITMQ (Requiere App Role 'ADMIN')
+### -------------------------------------------------------------------------
+
+### Consultar estado de conexion y resumen de RabbitMQ
+GET {{baseUrl}}/api/admin/rabbitmq/status
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Listar todas las colas administradas en RabbitMQ
+GET {{baseUrl}}/api/admin/rabbitmq/queues
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Consultar detalle y metricas de la cola principal de pedidos
+GET {{baseUrl}}/api/admin/rabbitmq/queues/pedidos.pedido-creado.queue
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Crear una nueva cola en RabbitMQ
+POST {{baseUrl}}/api/admin/rabbitmq/queues
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "pedidos.cocina-express.queue",
+  "durable": true,
+  "exclusive": false,
+  "autoDelete": false
+}
+
+### Purgar mensajes de una cola
+POST {{baseUrl}}/api/admin/rabbitmq/queues/pedidos.cocina-express.queue/purge
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Eliminar cola no critica
+DELETE {{baseUrl}}/api/admin/rabbitmq/queues/pedidos.cocina-express.queue
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Listar todos los exchanges administrados en RabbitMQ
+GET {{baseUrl}}/api/admin/rabbitmq/exchanges
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Crear un nuevo exchange (direct, topic, fanout o headers)
+POST {{baseUrl}}/api/admin/rabbitmq/exchanges
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "pedidos.cocina.exchange",
+  "type": "topic",
+  "durable": true,
+  "autoDelete": false
+}
+
+### Listar enlaces (bindings) activos
+GET {{baseUrl}}/api/admin/rabbitmq/bindings
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Crear un nuevo enlace (binding) entre cola y exchange
+POST {{baseUrl}}/api/admin/rabbitmq/bindings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "queueName": "pedidos.pedido-creado.queue",
+  "exchangeName": "pedidos.exchange",
+  "routingKey": "pedido.prioritario"
+}
+
+### Eliminar un enlace (binding)
+DELETE {{baseUrl}}/api/admin/rabbitmq/bindings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "queueName": "pedidos.pedido-creado.queue",
+  "exchangeName": "pedidos.exchange",
+  "routingKey": "pedido.prioritario"
+}

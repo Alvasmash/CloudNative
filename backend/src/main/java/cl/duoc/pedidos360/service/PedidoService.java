@@ -7,13 +7,18 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import cl.duoc.pedidos360.dto.ItemPedidoDTO;
 import cl.duoc.pedidos360.dto.PedidoCreateDTO;
+import cl.duoc.pedidos360.event.ItemPedidoEvent;
+import cl.duoc.pedidos360.event.PedidoCreadoEvent;
 import cl.duoc.pedidos360.model.EstadoPedido;
 import cl.duoc.pedidos360.model.ItemPedido;
 import cl.duoc.pedidos360.model.Pedido;
 import cl.duoc.pedidos360.model.Producto;
+import cl.duoc.pedidos360.producer.PedidoEventProducer;
 import cl.duoc.pedidos360.repository.PedidoRepository;
 import cl.duoc.pedidos360.repository.ProductoRepository;
 
@@ -21,22 +26,28 @@ import cl.duoc.pedidos360.repository.ProductoRepository;
  * =========================================================================
  * SERVICIO: PedidoService
  * =========================================================================
- * FUNCION: Controla el flujo transaccional de rdenes de compra en Pedidos360:
+ * FUNCION: Controla el flujo transaccional de ordenes de compra en Pedidos360:
  *          - Validacion de existencia de productos en el catalogo.
- *          - Verificacin y descuento automatico de stock en cocina.
- *          - Clculo matemtico de subtotales por item y total del pedido.
- *          - Asignacin de codigo unico y estado inicial PENDIENTE.
- * CONECTA CON: PedidoRepository, ProductoRepository, PedidoController y AdminController.
+ *          - Verificacion y descuento automatico de stock en cocina.
+ *          - Calculo matematico de subtotales por item y total del pedido.
+ *          - Asignacion de codigo unico y estado inicial PENDIENTE.
+ *          - Emision transaccional de eventos de negocio hacia RabbitMQ tras el commit.
+ * CONECTA CON: PedidoRepository, ProductoRepository, PedidoEventProducer, PedidoController y AdminController.
  */
 @Service
 public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
+    private final PedidoEventProducer pedidoEventProducer;
 
-    public PedidoService(PedidoRepository pedidoRepository, ProductoRepository productoRepository) {
+    public PedidoService(
+            PedidoRepository pedidoRepository,
+            ProductoRepository productoRepository,
+            PedidoEventProducer pedidoEventProducer) {
         this.pedidoRepository = pedidoRepository;
         this.productoRepository = productoRepository;
+        this.pedidoEventProducer = pedidoEventProducer;
     }
 
     // Listar todos los pedidos (usado por administracion)
@@ -58,8 +69,9 @@ public class PedidoService {
     }
 
     /**
-     * Crea un pedido de forma atmica: Si algun producto no tiene stock,
+     * Crea un pedido de forma atomica: Si algun producto no tiene stock,
      * la transaccion se cancela (rollback) y no se modifica la base de datos.
+     * Tras confirmar el commit, publica el evento PedidoCreadoEvent en RabbitMQ.
      */
     @Transactional
     public Pedido crearPedido(PedidoCreateDTO dto, String usuarioAutenticado) {
@@ -97,7 +109,24 @@ public class PedidoService {
 
         pedido.setTotal(total);
         // Guarda el pedido y automaticamente sus items por cascada JPA
-        return pedidoRepository.save(pedido);
+        Pedido pedidoGuardado = pedidoRepository.save(pedido);
+
+        // Mapear a DTO de evento de negocio desacoplado
+        PedidoCreadoEvent event = mapearAEvento(pedidoGuardado);
+
+        // Sincronizacion transaccional: publicar a RabbitMQ solo despues de commit exitoso en BD
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    pedidoEventProducer.publicarPedidoCreado(event);
+                }
+            });
+        } else {
+            pedidoEventProducer.publicarPedidoCreado(event);
+        }
+
+        return pedidoGuardado;
     }
 
     // Actualiza el estado del pedido (ej: PENDIENTE -> EN_PREPARACION -> EN_CAMINO -> ENTREGADO)
@@ -116,5 +145,32 @@ public class PedidoService {
             throw new IllegalArgumentException("Pedido no encontrado con ID: " + id);
         }
         pedidoRepository.deleteById(id);
+    }
+
+    /**
+     * Mapea una entidad JPA Pedido a su DTO de evento de dominio para RabbitMQ
+     */
+    private PedidoCreadoEvent mapearAEvento(Pedido pedido) {
+        List<ItemPedidoEvent> itemsEvent = pedido.getItems() != null
+                ? pedido.getItems().stream()
+                .map(i -> new ItemPedidoEvent(
+                        i.getProductoId(),
+                        i.getProductoNombre(),
+                        i.getCantidad(),
+                        i.getPrecioUnitario(),
+                        i.getSubtotal()))
+                .toList()
+                : List.of();
+
+        return new PedidoCreadoEvent(
+                pedido.getId(),
+                pedido.getNumeroPedido(),
+                pedido.getClienteNombre(),
+                pedido.getClienteEmail(),
+                pedido.getTotal(),
+                pedido.getEstado() != null ? pedido.getEstado().name() : EstadoPedido.PENDIENTE.name(),
+                pedido.getFechaCreacion(),
+                itemsEvent
+        );
     }
 }
