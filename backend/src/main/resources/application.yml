@@ -6,13 +6,13 @@ spring:
     name: pedidos360-backend
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:pedidosdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
-    username: ${SPRING_DATASOURCE_USERNAME:sa}
-    password: ${SPRING_DATASOURCE_PASSWORD:}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://aws-0-us-west-2.pooler.supabase.com:5432/postgres}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.postgresql.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres.dxcboyfuwcpejgpnqton}
+    password: ${SPRING_DATASOURCE_PASSWORD:Pedidos360@}
 
   jpa:
-    database-platform: ${SPRING_JPA_PLATFORM:org.hibernate.dialect.H2Dialect}
+    database-platform: ${SPRING_JPA_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
     hibernate:
       ddl-auto: ${SPRING_JPA_DDL_AUTO:update}
     show-sql: false
@@ -20,18 +20,7 @@ spring:
 
   sql:
     init:
-      mode: ${SPRING_SQL_INIT_MODE:always}
-
-  rabbitmq:
-    host: ${SPRING_RABBITMQ_HOST:localhost}
-    port: ${SPRING_RABBITMQ_PORT:5672}
-    username: ${SPRING_RABBITMQ_USERNAME:guest}
-    password: ${SPRING_RABBITMQ_PASSWORD:guest}
-    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/}
-    listener:
-      simple:
-        acknowledge-mode: manual
-        default-requeue-rejected: false
+      mode: never
 
 app:
   security:
