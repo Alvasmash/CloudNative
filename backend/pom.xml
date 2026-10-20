@@ -35,11 +35,7 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
-<dependency>
-    <groupId>org.postgresql</groupId>
-    <artifactId>postgresql</artifactId>
-    <scope>runtime</scope>
-</dependency>
+
     <!-- OAuth2 Resource Server: Lee y valida Access Tokens JWT emitidos por Azure AD (Microsoft Entra ID) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
