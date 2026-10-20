@@ -46,7 +46,7 @@ import cl.duoc.pedidos360.rabbitmq.service.RabbitMQAdminServiceImpl;
  */
 class RabbitMQAdminServiceTest {
 
-    private RabbitAdmin rabbitAdmin;
+    private org.springframework.amqp.core.AmqpAdmin rabbitAdmin;
     private ConnectionFactory connectionFactory;
     private RabbitMQAdminServiceImpl adminService;
 
@@ -56,7 +56,7 @@ class RabbitMQAdminServiceTest {
 
     @BeforeEach
     void setUp() {
-        rabbitAdmin = Mockito.mock(RabbitAdmin.class);
+        rabbitAdmin = Mockito.mock(org.springframework.amqp.core.AmqpAdmin.class);
         connectionFactory = Mockito.mock(ConnectionFactory.class);
 
         when(connectionFactory.getHost()).thenReturn("localhost");

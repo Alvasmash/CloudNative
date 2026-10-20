@@ -114,16 +114,45 @@ public class PedidoService {
         // Mapear a DTO de evento de negocio desacoplado
         PedidoCreadoEvent event = mapearAEvento(pedidoGuardado);
 
-        // Sincronizacion transaccional: publicar a RabbitMQ solo despues de commit exitoso en BD
+        // Generar evento para Cola 2 (Notificacion al cliente)
+        cl.duoc.pedidos360.event.NotificacionEvent notifEvent = new cl.duoc.pedidos360.event.NotificacionEvent(
+                pedidoGuardado.getId(),
+                pedidoGuardado.getNumeroPedido(),
+                pedidoGuardado.getClienteNombre(),
+                pedidoGuardado.getClienteEmail(),
+                "CONFIRMACION_PEDIDO",
+                "Tu pedido " + pedidoGuardado.getNumeroPedido() + " por $" + pedidoGuardado.getTotal() + " ha sido confirmado exitosamente y esta en cocina.",
+                LocalDateTime.now()
+        );
+
+        // Generar evento para Cola 3 (Facturacion y Boleta Electronica DTE)
+        double totalConIva = pedidoGuardado.getTotal();
+        double neto = Math.round(totalConIva / 1.19 * 100.0) / 100.0;
+        double iva = Math.round((totalConIva - neto) * 100.0) / 100.0;
+        String folio = "DTE-" + pedidoGuardado.getNumeroPedido().replace("PED-", "");
+
+        cl.duoc.pedidos360.event.FacturacionEvent factEvent = new cl.duoc.pedidos360.event.FacturacionEvent(
+                pedidoGuardado.getId(),
+                pedidoGuardado.getNumeroPedido(),
+                folio,
+                pedidoGuardado.getClienteNombre(),
+                pedidoGuardado.getClienteEmail(),
+                neto,
+                iva,
+                totalConIva,
+                LocalDateTime.now()
+        );
+
+        // Sincronizacion transaccional: publicar las 3 colas de RabbitMQ solo despues de commit en BD
         if (TransactionSynchronizationManager.isSynchronizationActive()) {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    pedidoEventProducer.publicarPedidoCreado(event);
+                    pedidoEventProducer.publicarCicloCompleto(event, notifEvent, factEvent);
                 }
             });
         } else {
-            pedidoEventProducer.publicarPedidoCreado(event);
+            pedidoEventProducer.publicarCicloCompleto(event, notifEvent, factEvent);
         }
 
         return pedidoGuardado;

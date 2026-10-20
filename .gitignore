@@ -1,0 +1,39 @@
+# Entornos y secretos
+.env
+*.pem
+*.key
+
+# Java & Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/wrapper/maven-wrapper.jar
+
+# Node & Angular
+node_modules/
+.angular/
+dist/
+.npm/
+
+# IDE & Editores
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Logs & Temporales
+*.log
+tatus
+.system_generated/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema Operativo
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store

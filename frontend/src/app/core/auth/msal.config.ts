@@ -25,7 +25,19 @@ export function loggerCallback(logLevel: LogLevel, message: string): void {
   }
 }
 
+export function resolveRedirectUri(): string {
+  if (typeof window !== 'undefined' && window.location) {
+    const origin = window.location.origin;
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return `${origin}/redirect`;
+    }
+  }
+  return environment.azure.redirectUri;
+}
+
 export function MSALInstanceFactory(): IPublicClientApplication {
+  const dynamicRedirectUri = resolveRedirectUri();
+
   return new PublicClientApplication({
     auth: {
       // Client ID de la aplicación Angular "Pedidos360"
@@ -34,11 +46,11 @@ export function MSALInstanceFactory(): IPublicClientApplication {
       // Tenant específico de Azure
       authority: environment.azure.authority,
 
-      // http://localhost:4200/
-      redirectUri: environment.azure.redirectUri,
+      // URI de retorno (localhost o GitHub Pages según entorno)
+      redirectUri: dynamicRedirectUri,
 
       // Después de cerrar sesión
-      postLogoutRedirectUri: environment.azure.redirectUri,
+      postLogoutRedirectUri: dynamicRedirectUri,
     },
 
     cache: {

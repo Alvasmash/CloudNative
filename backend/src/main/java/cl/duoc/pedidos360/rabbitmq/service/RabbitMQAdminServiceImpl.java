@@ -49,7 +49,7 @@ public class RabbitMQAdminServiceImpl implements RabbitMQAdminService {
 
     private static final Logger log = LoggerFactory.getLogger(RabbitMQAdminServiceImpl.class);
 
-    private final RabbitAdmin rabbitAdmin;
+    private final org.springframework.amqp.core.AmqpAdmin rabbitAdmin;
     private final ConnectionFactory connectionFactory;
 
     // Registro en memoria de recursos administrados para complementar inspeccion dinamica
@@ -59,7 +59,7 @@ public class RabbitMQAdminServiceImpl implements RabbitMQAdminService {
 
     @Autowired
     public RabbitMQAdminServiceImpl(
-            RabbitAdmin rabbitAdmin,
+            org.springframework.amqp.core.AmqpAdmin rabbitAdmin,
             ConnectionFactory connectionFactory,
             List<Queue> declaredQueues,
             List<Exchange> declaredExchanges,

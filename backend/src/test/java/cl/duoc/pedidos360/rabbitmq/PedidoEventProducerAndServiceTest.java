@@ -115,5 +115,20 @@ class PedidoEventProducerAndServiceTest {
         assertEquals(17980.0, published.getTotal());
         assertEquals(1, published.getItems().size());
         assertEquals("Pizza Margherita", published.getItems().get(0).getProductoNombre());
+
+        // Verificar que tambien se emitieron eventos para Cola 2 (Notificacion) y Cola 3 (Facturacion)
+        verify(rabbitTemplate).convertAndSend(
+                eq(RabbitMQConstants.EXCHANGE_PEDIDOS),
+                eq(RabbitMQConstants.RK_NOTIFICACION),
+                any(cl.duoc.pedidos360.event.NotificacionEvent.class),
+                any(MessagePostProcessor.class)
+        );
+
+        verify(rabbitTemplate).convertAndSend(
+                eq(RabbitMQConstants.EXCHANGE_PEDIDOS),
+                eq(RabbitMQConstants.RK_FACTURACION),
+                any(cl.duoc.pedidos360.event.FacturacionEvent.class),
+                any(MessagePostProcessor.class)
+        );
     }
 }

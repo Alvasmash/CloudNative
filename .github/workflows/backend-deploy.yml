@@ -27,7 +27,18 @@ jobs:
       - name: Compilar backend
         run: mvn -f backend/pom.xml clean package -DskipTests
 
+      - name: Validar secretos de despliegue EC2
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.EC2_HOST }}" ] || [ -z "${{ secrets.EC2_SSH_KEY }}" ] || [ -z "${{ secrets.EC2_USER }}" ]; then
+            echo "::warning::Secretos EC2 incompletos en GitHub Actions (EC2_HOST, EC2_SSH_KEY, EC2_USER). Omitiendo despliegue automatico a EC2."
+            echo "secrets_configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Preparar SSH
+        if: steps.check-secrets.outputs.secrets_configured == 'true'
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/pedidos360-key.pem
@@ -35,13 +46,16 @@ jobs:
           ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Subir JAR a EC2
+        if: steps.check-secrets.outputs.secrets_configured == 'true'
         run: |
           scp -i ~/.ssh/pedidos360-key.pem \
             backend/target/pedidos360-backend-0.0.1-SNAPSHOT.jar \
             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/
 
       - name: Reiniciar backend
+        if: steps.check-secrets.outputs.secrets_configured == 'true'
         run: |
           ssh -i ~/.ssh/pedidos360-key.pem \
             ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
             "sudo systemctl restart pedidos360 && sudo systemctl is-active pedidos360"
+

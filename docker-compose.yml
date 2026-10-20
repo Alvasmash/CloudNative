@@ -1,0 +1,119 @@
+version: '3.8'
+
+# =============================================================================
+# DOCKER COMPOSE - PLATAFORMA CLOUD NATIVE PEDIDOS360
+# =============================================================================
+# Demostracion de:
+# 1. Cluster RabbitMQ de 2 nodos auto-formado con Erlang Cookie compartida.
+# 2. Microservicio backend Spring Boot conectado al cluster y asegurado por JWT.
+# 3. Frontend Angular en Nginx con SPA routing.
+# 4. Red bridge dedicada y persistencia mediante volumenes nombrados.
+# =============================================================================
+
+networks:
+  pedidos360-network:
+    name: pedidos360-network
+    driver: bridge
+
+volumes:
+  rabbit1_data:
+    name: pedidos360-rabbit1-data
+  rabbit2_data:
+    name: pedidos360-rabbit2-data
+
+services:
+  # ===========================================================================
+  # NODO 1 RABBITMQ (LIDER INICIAL DEL CLUSTER)
+  # ===========================================================================
+  rabbit1:
+    image: rabbitmq:3.13-management
+    container_name: pedidos360-rabbit1
+    hostname: rabbit1
+    environment:
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-PEDIDOS360_SECRET_COOKIE_2026}
+      RABBITMQ_NODENAME: rabbit@rabbit1
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-admin123}
+    volumes:
+      - ./docker/rabbitmq/rabbitmq-node1.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - rabbit1_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"    # Puerto AMQP estandar
+      - "15672:15672"  # Consola Management RabbitMQ Nodo 1
+    networks:
+      - pedidos360-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ===========================================================================
+  # NODO 2 RABBITMQ (MIEMBRO DEL CLUSTER)
+  # ===========================================================================
+  rabbit2:
+    image: rabbitmq:3.13-management
+    container_name: pedidos360-rabbit2
+    hostname: rabbit2
+    environment:
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE:-PEDIDOS360_SECRET_COOKIE_2026}
+      RABBITMQ_NODENAME: rabbit@rabbit2
+    volumes:
+      - ./docker/rabbitmq/rabbitmq-node2.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - rabbit2_data:/var/lib/rabbitmq
+    ports:
+      - "5673:5672"    # AMQP Nodo 2 expuesto en host 5673
+      - "15673:15672"  # Consola Management RabbitMQ Nodo 2 en host 15673
+    depends_on:
+      rabbit1:
+        condition: service_healthy
+    networks:
+      - pedidos360-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ===========================================================================
+  # BACKEND SPRING BOOT (MICROSERVICIO RESOURCE SERVER)
+  # ===========================================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pedidos360-backend
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit1
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-admin}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-admin123}
+      JWT_ISSUER: ${JWT_ISSUER:-https://login.microsoftonline.com/16c2a7cf-f000-475f-a847-f95ee0b36404/v2.0}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-aef48164-1df8-49e6-b9f2-c1d8953ea200}
+      ALLOWED_ORIGINS: http://localhost:4200,http://localhost:80,http://localhost,https://alvasmash.github.io
+    ports:
+      - "8080:8080"
+    depends_on:
+      rabbit1:
+        condition: service_healthy
+      rabbit2:
+        condition: service_started
+    networks:
+      - pedidos360-network
+
+  # ===========================================================================
+  # FRONTEND ANGULAR (DISTRIBUIDO MEDIANTE NGINX)
+  # ===========================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pedidos360-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - pedidos360-network

@@ -34,15 +34,23 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 public class RabbitMQConfig {
 
     // =========================================================================
-    // EXCHANGES
+    // EXCHANGES (DIRECT Y TOPIC)
     // =========================================================================
 
     /**
-     * Exchange principal para publicacion de eventos de pedidos (durable)
+     * Exchange principal Topic para eventos de pedidos (durable)
      */
     @Bean
     public TopicExchange pedidosExchange() {
         return new TopicExchange(RabbitMQConstants.EXCHANGE_PEDIDOS, true, false);
+    }
+
+    /**
+     * Exchange Direct para operaciones y comandos sincronizables punto a punto
+     */
+    @Bean
+    public DirectExchange pedidosDirectExchange() {
+        return new DirectExchange(RabbitMQConstants.EXCHANGE_DIRECT, true, false);
     }
 
     /**
@@ -54,7 +62,7 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Dead Letter Exchange (DLX): recibe los mensajes descartados definitivamente
+     * Dead Letter Exchange (DLX): enruta mensajes rechazados a su respectiva DLQ
      */
     @Bean
     public DirectExchange deadLetterExchange() {
@@ -62,12 +70,12 @@ public class RabbitMQConfig {
     }
 
     // =========================================================================
-    // COLAS (QUEUES)
+    // 3 COLAS PRINCIPALES Y SUS RESPECTIVAS DLQ
     // =========================================================================
 
     /**
-     * Cola principal de procesamiento de pedidos creados (durable).
-     * Configura Dead Letter Exchange hacia pedidos.dlx con routing key pedido.dlq.
+     * COLA 1: Procesamiento principal de pedidos creados (durable).
+     * Configura DLX hacia pedidos.dlx con routing key pedido.dlq.
      */
     @Bean
     public Queue pedidoCreadoQueue() {
@@ -80,9 +88,60 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Cola de reintentos temporizada (Retry Queue).
-     * Mantiene los mensajes durante DEFAULT_RETRY_TTL_MS (5 segundos) y, al expirar,
-     * los enruta de vuelta al exchange principal para que vuelvan a ser consumidos.
+     * DLQ 1: Dead Letter Queue para pedidos no procesables
+     */
+    @Bean
+    public Queue deadLetterQueue() {
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_DLQ).build();
+    }
+
+    /**
+     * COLA 2: Notificaciones asincronas a clientes (correo/SMS/push).
+     * Configura DLX hacia pedidos.dlx con routing key notificacion.dlq.
+     */
+    @Bean
+    public Queue notificacionQueue() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DLX);
+        args.put("x-dead-letter-routing-key", RabbitMQConstants.RK_NOTIFICACION_DLQ);
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_NOTIFICACION)
+                .withArguments(args)
+                .build();
+    }
+
+    /**
+     * DLQ 2: Dead Letter Queue para notificaciones fallidas
+     */
+    @Bean
+    public Queue notificacionDlq() {
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_NOTIFICACION_DLQ).build();
+    }
+
+    /**
+     * COLA 3: Facturacion y emision de Documentos Tributarios (Boleta DTE).
+     * Configura DLX hacia pedidos.dlx con routing key facturacion.dlq.
+     */
+    @Bean
+    public Queue facturacionQueue() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-dead-letter-exchange", RabbitMQConstants.EXCHANGE_DLX);
+        args.put("x-dead-letter-routing-key", RabbitMQConstants.RK_FACTURACION_DLQ);
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_FACTURACION)
+                .withArguments(args)
+                .build();
+    }
+
+    /**
+     * DLQ 3: Dead Letter Queue para errores en facturacion
+     */
+    @Bean
+    public Queue facturacionDlq() {
+        return QueueBuilder.durable(RabbitMQConstants.QUEUE_FACTURACION_DLQ).build();
+    }
+
+    /**
+     * Cola de reintentos temporizada (Retry Queue con TTL de 5 segundos).
+     * Al expirar los 5000 ms, expulsa el mensaje al exchange principal para reintento.
      */
     @Bean
     public Queue retryQueue() {
@@ -96,15 +155,7 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Dead Letter Queue (DLQ): almacena los mensajes no procesables para auditoria
-     */
-    @Bean
-    public Queue deadLetterQueue() {
-        return QueueBuilder.durable(RabbitMQConstants.QUEUE_DLQ).build();
-    }
-
-    /**
-     * Cola de auditoria: almacena copia de los eventos del sistema
+     * Cola de auditoria: almacena copia de todos los eventos del ciclo de vida
      */
     @Bean
     public Queue auditoriaQueue() {
@@ -112,11 +163,11 @@ public class RabbitMQConfig {
     }
 
     // =========================================================================
-    // BINDINGS (ENLACES)
+    // BINDINGS (ENLACES PRINCIPALES Y DLQ)
     // =========================================================================
 
     /**
-     * Enlaza la cola principal al exchange de pedidos con la routing key "pedido.creado"
+     * Enlaza COLA 1 al TopicExchange con routing key "pedido.creado"
      */
     @Bean
     public Binding bindingPedidoCreado(Queue pedidoCreadoQueue, TopicExchange pedidosExchange) {
@@ -126,17 +177,37 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Enlaza la cola de reintentos al exchange de reintentos con la routing key "pedido.reintento"
+     * Enlaza COLA 2 al TopicExchange con routing key "pedido.notificacion"
      */
     @Bean
-    public Binding bindingRetry(Queue retryQueue, DirectExchange retryExchange) {
-        return BindingBuilder.bind(retryQueue)
-                .to(retryExchange)
-                .with(RabbitMQConstants.RK_RETRY);
+    public Binding bindingNotificacion(Queue notificacionQueue, TopicExchange pedidosExchange) {
+        return BindingBuilder.bind(notificacionQueue)
+                .to(pedidosExchange)
+                .with(RabbitMQConstants.RK_NOTIFICACION);
     }
 
     /**
-     * Enlaza la Dead Letter Queue al DLX con la routing key "pedido.dlq"
+     * Enlaza COLA 3 al TopicExchange con routing key "pedido.facturacion"
+     */
+    @Bean
+    public Binding bindingFacturacion(Queue facturacionQueue, TopicExchange pedidosExchange) {
+        return BindingBuilder.bind(facturacionQueue)
+                .to(pedidosExchange)
+                .with(RabbitMQConstants.RK_FACTURACION);
+    }
+
+    /**
+     * Enlaza la cola de auditoria al TopicExchange para capturar "pedido.*"
+     */
+    @Bean
+    public Binding bindingAuditoria(Queue auditoriaQueue, TopicExchange pedidosExchange) {
+        return BindingBuilder.bind(auditoriaQueue)
+                .to(pedidosExchange)
+                .with(RabbitMQConstants.RK_PEDIDO_ALL);
+    }
+
+    /**
+     * Enlace DLQ 1 al DLX con routing key "pedido.dlq"
      */
     @Bean
     public Binding bindingDeadLetter(Queue deadLetterQueue, DirectExchange deadLetterExchange) {
@@ -146,13 +217,43 @@ public class RabbitMQConfig {
     }
 
     /**
-     * Enlaza la cola de auditoria al exchange de pedidos para capturar todos los eventos "pedido.*"
+     * Enlace DLQ 2 al DLX con routing key "notificacion.dlq"
      */
     @Bean
-    public Binding bindingAuditoria(Queue auditoriaQueue, TopicExchange pedidosExchange) {
-        return BindingBuilder.bind(auditoriaQueue)
-                .to(pedidosExchange)
-                .with(RabbitMQConstants.RK_PEDIDO_ALL);
+    public Binding bindingDeadLetterNotificacion(Queue notificacionDlq, DirectExchange deadLetterExchange) {
+        return BindingBuilder.bind(notificacionDlq)
+                .to(deadLetterExchange)
+                .with(RabbitMQConstants.RK_NOTIFICACION_DLQ);
+    }
+
+    /**
+     * Enlace DLQ 3 al DLX con routing key "facturacion.dlq"
+     */
+    @Bean
+    public Binding bindingDeadLetterFacturacion(Queue facturacionDlq, DirectExchange deadLetterExchange) {
+        return BindingBuilder.bind(facturacionDlq)
+                .to(deadLetterExchange)
+                .with(RabbitMQConstants.RK_FACTURACION_DLQ);
+    }
+
+    /**
+     * Enlaza la cola de reintentos al DirectExchange de reintentos
+     */
+    @Bean
+    public Binding bindingRetry(Queue retryQueue, DirectExchange retryExchange) {
+        return BindingBuilder.bind(retryQueue)
+                .to(retryExchange)
+                .with(RabbitMQConstants.RK_RETRY);
+    }
+
+    /**
+     * Enlace directo punto a punto demostrando DirectExchange para comandos
+     */
+    @Bean
+    public Binding bindingDirectCommand(Queue pedidoCreadoQueue, DirectExchange pedidosDirectExchange) {
+        return BindingBuilder.bind(pedidoCreadoQueue)
+                .to(pedidosDirectExchange)
+                .with(RabbitMQConstants.RK_DIRECT_COMMAND);
     }
 
     // =========================================================================
