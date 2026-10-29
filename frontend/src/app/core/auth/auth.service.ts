@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { PublicClientApplication, BrowserCacheLocation } from '@azure/msal-browser';
 import { environment } from '../../../environments/environment';
-import { AppUser } from '../models/user-profile.model';
+import { AppUser, UserProfile } from '../models/user-profile.model';
+import { mapBackendProfile } from './backend-profile';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -45,7 +46,8 @@ export class AuthService {
       this.microsoft.setActiveAccount(account);
       if (result?.accessToken) { this.token = result.accessToken; this.expiresAt = result.expiresOn?.getTime() || 0; }
       await this.getAccessToken();
-      this.currentUser.set(await firstValueFrom(this.http.get<AppUser>(`${environment.apiUrl}/api/session`)));
+      const profile = await firstValueFrom(this.http.get<UserProfile>(`${environment.apiUrl}/api/profile`));
+      this.currentUser.set(mapBackendProfile(profile, account));
     } catch {
       this.token = '';
       this.currentUser.set(null);
