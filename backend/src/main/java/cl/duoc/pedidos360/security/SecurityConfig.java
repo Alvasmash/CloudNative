@@ -93,6 +93,7 @@ public class SecurityConfig {
      * y validar tanto el emisor (issuer) como la audiencia (audience).
      */
     @Bean
+    @org.springframework.context.annotation.Profile("!local")
     @ConditionalOnMissingBean(JwtDecoder.class)
     JwtDecoder jwtDecoder(
             @Value("${app.security.issuer}") String issuer,
@@ -119,9 +120,10 @@ public class SecurityConfig {
      * Vincula el convertidor de autoridades personalizadas (AuthoritiesConverter)
      */
     @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
+    JwtAuthenticationConverter jwtAuthenticationConverter(AdminEmailPolicy policy) {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(new AuthoritiesConverter());
+        converter.setJwtGrantedAuthoritiesConverter(new AuthoritiesConverter(policy));
+        converter.setPrincipalClaimName("oid");
         return converter;
     }
 
@@ -141,7 +143,7 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Guest-Token"));
         configuration.setExposedHeaders(List.of("WWW-Authenticate"));
         configuration.setAllowCredentials(false);
 

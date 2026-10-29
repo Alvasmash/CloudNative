@@ -25,6 +25,18 @@ import java.util.List;
 @Entity
 @Table(name = "pedidos")
 public class Pedido {
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(name = "owner_subject")
+    private String ownerSubject;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @Column(name = "guest_access_hash")
+    private String guestAccessHash;
+
+    public String getOwnerSubject() { return ownerSubject; }
+    public void setOwnerSubject(String value) { ownerSubject = value; }
+    public String getGuestAccessHash() { return guestAccessHash; }
+    public void setGuestAccessHash(String value) { guestAccessHash = value; }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -17,6 +17,10 @@ import cl.duoc.pedidos360.model.Pedido;
  */
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
+    List<Pedido> findByOwnerSubjectOrderByFechaCreacionDesc(String ownerSubject);
+    Optional<Pedido> findByIdAndOwnerSubject(Long id, String ownerSubject);
+    List<Pedido> findByGuestAccessHashOrderByFechaCreacionDesc(String guestAccessHash);
+    Optional<Pedido> findByIdAndGuestAccessHash(Long id, String guestAccessHash);
 
     // Busca un pedido por su numero de orden unico (ej: "PED-A1B2C3D4")
     Optional<Pedido> findByNumeroPedido(String numeroPedido);

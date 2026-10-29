@@ -22,10 +22,12 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
  * EVALUACION (Rbrica 40%): "Aplica autorizacion por rol cuando corresponde y lee roles y scopes desde los claims".
  */
 public class AuthoritiesConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+    private final AdminEmailPolicy policy;
 
     private final JwtGrantedAuthoritiesConverter scopesConverter = new JwtGrantedAuthoritiesConverter();
 
-    public AuthoritiesConverter() {
+    public AuthoritiesConverter(AdminEmailPolicy policy) {
+        this.policy = policy;
         // Por convencin OAuth2 en Azure AD, los scopes vienen en el claim 'scp' separados por espacio
         scopesConverter.setAuthoritiesClaimName("scp");
         scopesConverter.setAuthorityPrefix("SCOPE_");
@@ -41,13 +43,8 @@ public class AuthoritiesConverter implements Converter<Jwt, Collection<GrantedAu
             authorities.addAll(scopes);
         }
 
-        // 2. Extraer y agregar App Roles definidos en Microsoft Entra ID
-        List<String> roles = jwt.getClaimAsStringList("roles");
-        if (roles != null) {
-            roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                    .forEach(authorities::add);
-        }
+        // The directory token is already validated. Client-supplied roles never grant admin.
+        authorities.add(new SimpleGrantedAuthority(policy.isAdmin(jwt) ? "ROLE_ADMIN" : "ROLE_USER"));
 
         return authorities;
     }

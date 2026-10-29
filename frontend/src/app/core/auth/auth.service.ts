@@ -1,232 +1,99 @@
-import {
-  Injectable,
-  signal,
-  computed,
-  inject,
-  PLATFORM_ID,
-} from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { MsalService, MsalBroadcastService } from '@azure/msal-angular';
-import {
-  EventMessage,
-  EventType,
-  AccountInfo,
-  AuthenticationResult,
-} from '@azure/msal-browser';
-import { filter } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { PublicClientApplication, BrowserCacheLocation } from '@azure/msal-browser';
 import { environment } from '../../../environments/environment';
 import { AppUser } from '../models/user-profile.model';
-import { ToastService } from '../services/toast.service';
-import { AUTH_ERROR_STORAGE_KEY } from './msal.config';
 
-const DEMO_USER_STORAGE_KEY = 'pedidos360_demo_user';
-
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly msalService = inject(MsalService);
-  private readonly msalBroadcastService = inject(MsalBroadcastService);
+  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly toastService = inject(ToastService);
-  private readonly platformId = inject(PLATFORM_ID);
+  private readonly microsoft = new PublicClientApplication({
+    auth: {
+      clientId: environment.microsoft.clientId,
+      authority: `https://login.microsoftonline.com/${environment.microsoft.tenantId}`,
+      redirectUri: new URL('redirect', document.baseURI).href,
+      postLogoutRedirectUri: new URL(environment.useHashRouting ? 'redirect' : 'login', document.baseURI).href,
 
-  // Estados Reactivos Principales
+    },
+    cache: { cacheLocation: BrowserCacheLocation.SessionStorage },
+    system: { loggerOptions: { piiLoggingEnabled: false } },
+  });
+  private token = '';
+  private expiresAt = 0;
   readonly currentUser = signal<AppUser | null>(null);
-  readonly isLoading = signal<boolean>(false);
-  readonly isDemoMode = signal<boolean>(environment.demoMode);
-
-  // Computados
+  readonly isLoading = signal(false);
+  readonly isDemoMode = signal(false);
+  readonly authError = signal('');
   readonly isAuthenticated = computed(() => this.currentUser() !== null);
   readonly isAdmin = computed(() => this.currentUser()?.isAdmin ?? false);
   readonly userName = computed(() => this.currentUser()?.name ?? 'Invitado');
   readonly userEmail = computed(() => this.currentUser()?.email ?? '');
 
-  constructor() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.initAuth();
-    }
-  }
-
-  private initAuth(): void {
-    // 0. Mostrar el error del retorno de Microsoft, si lo hubo
-    const authError = sessionStorage.getItem(AUTH_ERROR_STORAGE_KEY);
-
-    if (authError) {
-      sessionStorage.removeItem(AUTH_ERROR_STORAGE_KEY);
-      this.toastService.error(authError, 'Error de Autenticación');
-    }
-
-    // 1. Verificar si hay usuario demo almacenado
-    const storedDemoUser = sessionStorage.getItem(DEMO_USER_STORAGE_KEY);
-
-    if (storedDemoUser) {
-      try {
-        const user = JSON.parse(storedDemoUser) as AppUser;
-        this.currentUser.set(user);
-        return;
-      } catch {
-        sessionStorage.removeItem(DEMO_USER_STORAGE_KEY);
-      }
-    }
-    // 3. Escuchar eventos de MSAL
-    this.msalBroadcastService.msalSubject$
-      .pipe(
-        filter(
-          (msg: EventMessage) =>
-            msg.eventType === EventType.LOGIN_SUCCESS ||
-            msg.eventType === EventType.ACQUIRE_TOKEN_SUCCESS ||
-            msg.eventType === EventType.ACTIVE_ACCOUNT_CHANGED,
-        ),
-      )
-      .subscribe((result: EventMessage) => {
-        const payload = result.payload as AuthenticationResult;
-
-        if (payload?.account) {
-          this.msalService.instance.setActiveAccount(payload.account);
-          this.processAccount(payload.account);
-        }
-      });
-
-    // 4. Revisar si ya existe una cuenta activa en MSAL
-    const activeAccount = this.msalService.instance.getActiveAccount();
-
-    if (activeAccount) {
-      this.processAccount(activeAccount);
-    } else {
-      const accounts = this.msalService.instance.getAllAccounts();
-
-      if (accounts.length > 0) {
-        this.msalService.instance.setActiveAccount(accounts[0]);
-        this.processAccount(accounts[0]);
-      }
-    }
-  }
-
-  /**
-   * Procesa la cuenta de Azure AD y extrae los claims del ID Token
-   */
-  private processAccount(account: AccountInfo): void {
-    const claims = account.idTokenClaims as Record<string, any> | undefined;
-
-    const roles: string[] = claims?.['roles'] || [];
-
-    const isAdmin = roles.includes('ADMIN') || roles.includes('ROLE_ADMIN');
-
-    const appUser: AppUser = {
-      name: account.name || account.username || 'Usuario Azure AD',
-      email: account.username || '',
-      username: account.username || '',
-      roles,
-      isAdmin,
-    };
-
-    this.currentUser.set(appUser);
-  }
-
-  /**
-   * Inicia sesión mediante Microsoft Entra ID (Azure AD)
-   * usando Popup.
-   */
-  async loginWithMicrosoft(): Promise<void> {
-    // Evita iniciar otra interacción mientras MSAL está procesando una anterior
-    if (this.isLoading()) {
-      return;
-    }
-
-    this.isLoading.set(true);
-
+  async initialize(): Promise<void> {
+    sessionStorage.removeItem('pedidos360_local_session');
+    this.authError.set(sessionStorage.getItem('pedidos360_auth_error') || '');
+    sessionStorage.removeItem('pedidos360_auth_error');
     try {
-      // Validar configuración de Azure
-      if (environment.azure.clientId === 'TU_AZURE_CLIENT_ID_PLACEHOLDER') {
-        this.toastService.warning(
-          'Azure AD no está configurado con Client ID real. Puedes usar el modo Demo para probar el sistema.',
-          'Configuración Azure',
-        );
-
-        return;
-      }
-
-      /*
-       * Redirección de página completa: el navegador sale hacia Microsoft
-       * y el retorno se procesa en el inicializador de app.config.ts.
-       * Se pide también el scope de la API para consentirlo en el login.
-       */
-      await this.msalService.instance.loginRedirect({
-        scopes: [...environment.azure.loginScopes, environment.azure.apiScope],
-        prompt: 'select_account',
-      });
-    } catch (err: any) {
-      console.error('Error durante login con Azure AD:', err);
-
-      this.toastService.error(
-        err?.message || 'No se pudo completar la autenticación con Microsoft',
-        'Error de Autenticación',
-      );
+      await this.microsoft.initialize();
+      const result = await this.microsoft.handleRedirectPromise({ navigateToLoginRequestUrl: false });
+      if (result?.account) this.microsoft.setActiveAccount(result.account);
+      const account = this.microsoft.getActiveAccount() || this.microsoft.getAllAccounts()[0];
+      if (!account) return;
+      this.microsoft.setActiveAccount(account);
+      if (result?.accessToken) { this.token = result.accessToken; this.expiresAt = result.expiresOn?.getTime() || 0; }
+      await this.getAccessToken();
+      this.currentUser.set(await firstValueFrom(this.http.get<AppUser>(`${environment.apiUrl}/api/session`)));
+    } catch {
+      this.token = '';
+      this.currentUser.set(null);
+      this.authError.set('No se pudo validar la sesión de Microsoft. Inicia sesión nuevamente; comprueba el registro de la aplicación si el error continúa.');
+      if (environment.useHashRouting && /\/redirect(?:\.html|\/)?$/.test(window.location.pathname)) sessionStorage.setItem('pedidos360_auth_error', this.authError());
     } finally {
+      if (environment.useHashRouting && /\/redirect(?:\.html|\/)?$/.test(window.location.pathname)) {
+        window.location.replace(new URL('#' + this.redirectDestination(), document.baseURI).href);
+      }
+    }
+  }
+
+  async loginWithMicrosoft(returnUrl?: string): Promise<void> {
+    if (this.isLoading()) return;
+    this.isLoading.set(true);
+    this.authError.set('');
+    if (returnUrl?.startsWith('/') && !returnUrl.startsWith('//')) sessionStorage.setItem('pedidos360_return_url', returnUrl);
+    else sessionStorage.removeItem('pedidos360_return_url');
+    try {
+      await this.microsoft.loginRedirect({ scopes: ['openid', 'profile', 'email', environment.microsoft.apiScope], prompt: 'select_account' });
+    } catch {
+      this.authError.set('No se pudo abrir Microsoft. Revisa tu conexión y vuelve a intentar.');
       this.isLoading.set(false);
     }
   }
 
-  /**
-   * Cierra sesión tanto en Azure AD como en el estado local
-   */
-  async logout(): Promise<void> {
-    this.currentUser.set(null);
-
-    sessionStorage.removeItem(DEMO_USER_STORAGE_KEY);
-
-    try {
-      const activeAccount = this.msalService.instance.getActiveAccount();
-
-      if (activeAccount) {
-        await this.msalService.instance.logoutRedirect({
-          account: activeAccount,
-        });
-      }
-    } catch (err) {
-      console.warn(
-        'Error en logout de MSAL (posible sesión local limpia):',
-        err,
-      );
-    } finally {
-      this.toastService.info('Sesión cerrada correctamente');
-
-      await this.router.navigate(['/login']);
-    }
+  async getAccessToken(): Promise<string> {
+    if (this.token && this.expiresAt > Date.now() + 60000) return this.token;
+    const account = this.microsoft.getActiveAccount();
+    if (!account) throw new Error('Inicia sesión con Microsoft para continuar.');
+    const result = await this.microsoft.acquireTokenSilent({ account, scopes: [environment.microsoft.apiScope] });
+    this.token = result.accessToken;
+    this.expiresAt = result.expiresOn?.getTime() || 0;
+    return this.token;
   }
 
-  /**
-   * Modo Demostración / Evaluación Académica:
-   * Permite a los evaluadores cambiar entre rol Cliente y Admin.
-   */
-  setDemoUser(role: 'ADMIN' | 'USER'): void {
-    const isAdmin = role === 'ADMIN';
+  redirectDestination(): string {
+    const target = sessionStorage.getItem('pedidos360_return_url');
+    sessionStorage.removeItem('pedidos360_return_url');
+    if (!this.isAuthenticated()) return '/login';
+    return target?.startsWith('/') && !target.startsWith('//') ? target : (this.isAdmin() ? '/admin' : '/menu');
+  }
 
-    const demoUser: AppUser = {
-      name: isAdmin ? 'Profesor / Administrador' : 'Estudiante Duoc UC',
-
-      email: isAdmin ? 'admin.pedidos360@duocuc.cl' : 'estudiante@duocuc.cl',
-
-      username: isAdmin ? 'admin.pedidos360' : 'estudiante.duoc',
-
-      roles: isAdmin ? ['ROLE_ADMIN', 'ADMIN'] : ['ROLE_USER'],
-
-      isAdmin,
-    };
-
-    this.currentUser.set(demoUser);
-
-    sessionStorage.setItem(DEMO_USER_STORAGE_KEY, JSON.stringify(demoUser));
-
-    this.toastService.success(
-      `Sesión iniciada en Modo Demo como ${
-        isAdmin ? 'ADMINISTRADOR (ROLE_ADMIN)' : 'CLIENTE REGULAR'
-      }`,
-      'Modo Demostración',
-    );
-
-    this.router.navigate(['/menu']);
+  async logout(): Promise<void> {
+    this.currentUser.set(null);
+    this.token = '';
+    this.expiresAt = 0;
+    try { await this.microsoft.logoutRedirect(); }
+    catch { await this.microsoft.clearCache(); await this.router.navigate(['/login']); }
   }
 }

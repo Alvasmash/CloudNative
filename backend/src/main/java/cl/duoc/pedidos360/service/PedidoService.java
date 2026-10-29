@@ -40,20 +40,33 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final ProductoRepository productoRepository;
     private final PedidoEventProducer pedidoEventProducer;
+    private final org.springframework.context.ApplicationEventPublisher domainEvents;
 
     public PedidoService(
             PedidoRepository pedidoRepository,
             ProductoRepository productoRepository,
-            PedidoEventProducer pedidoEventProducer) {
+            PedidoEventProducer pedidoEventProducer,
+            org.springframework.context.ApplicationEventPublisher domainEvents) {
         this.pedidoRepository = pedidoRepository;
         this.productoRepository = productoRepository;
         this.pedidoEventProducer = pedidoEventProducer;
+        this.domainEvents = domainEvents;
     }
 
     // Listar todos los pedidos (usado por administracion)
     @Transactional(readOnly = true)
     public List<Pedido> listarTodos() {
         return pedidoRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Pedido> listarPorUsuario(String subject) {
+        return pedidoRepository.findByOwnerSubjectOrderByFechaCreacionDesc(subject);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Pedido> buscarPorUsuario(Long id, String subject) {
+        return pedidoRepository.findByIdAndOwnerSubject(id, subject);
     }
 
     // Buscar una orden por su ID
@@ -76,6 +89,7 @@ public class PedidoService {
     @Transactional
     public Pedido crearPedido(PedidoCreateDTO dto, String usuarioAutenticado) {
         Pedido pedido = new Pedido();
+        pedido.setOwnerSubject(usuarioAutenticado);
         // Genera un codigo de orden unico y legible (ej: PED-C83E92B1)
         pedido.setNumeroPedido("PED-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         pedido.setClienteNombre(dto.getClienteNombre());
@@ -110,6 +124,7 @@ public class PedidoService {
         pedido.setTotal(total);
         // Guarda el pedido y automaticamente sus items por cascada JPA
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
+        publishAfterCommit(cl.duoc.pedidos360.event.PedidoLifecycleEvent.from("PEDIDO_CREADO", pedidoGuardado));
 
         // Mapear a DTO de evento de negocio desacoplado
         PedidoCreadoEvent event = mapearAEvento(pedidoGuardado);
@@ -164,16 +179,29 @@ public class PedidoService {
         Pedido pedido = pedidoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con ID: " + id));
         pedido.setEstado(nuevoEstado);
-        return pedidoRepository.save(pedido);
+        Pedido actualizado = pedidoRepository.save(pedido);
+        publishAfterCommit(cl.duoc.pedidos360.event.PedidoLifecycleEvent.from("ESTADO_ACTUALIZADO", actualizado));
+        return actualizado;
     }
 
     // Elimina una orden (operacion reservada para el rol de administracion)
     @Transactional
     public void eliminarPedido(Long id) {
-        if (!pedidoRepository.existsById(id)) {
-            throw new IllegalArgumentException("Pedido no encontrado con ID: " + id);
-        }
+        Pedido pedido = pedidoRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con ID: " + id));
         pedidoRepository.deleteById(id);
+        publishAfterCommit(cl.duoc.pedidos360.event.PedidoLifecycleEvent.from("PEDIDO_ELIMINADO", pedido));
+    }
+
+    private void publishAfterCommit(cl.duoc.pedidos360.event.PedidoLifecycleEvent event) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() { domainEvents.publishEvent(event); }
+            });
+        } else {
+            domainEvents.publishEvent(event);
+        }
     }
 
     /**

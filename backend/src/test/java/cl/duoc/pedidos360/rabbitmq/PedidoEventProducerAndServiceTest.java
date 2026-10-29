@@ -53,7 +53,8 @@ class PedidoEventProducerAndServiceTest {
 
         pedidoRepository = Mockito.mock(PedidoRepository.class);
         productoRepository = Mockito.mock(ProductoRepository.class);
-        pedidoService = new PedidoService(pedidoRepository, productoRepository, producer);
+        pedidoService = new PedidoService(pedidoRepository, productoRepository, producer,
+            Mockito.mock(org.springframework.context.ApplicationEventPublisher.class));
     }
 
     @Test

@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 import { OrderService } from '../../core/services/order.service';
 import { Pedido } from '../../core/models/pedido.model';
 import { EstadoPedido } from '../../core/models/estado-pedido.model';
@@ -25,6 +26,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
           <p class="page-subtitle">
             Revisa el estado y detalle de tus compras gastronómicas en tiempo
             real.
+            @if (!authService.isAuthenticated()) { <span>Como invitado, verás los pedidos de esta pestaña.</span> }
           </p>
         </div>
         <a routerLink="/menu" class="btn btn-primary">
@@ -189,13 +191,13 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .page-title {
         font-size: 2rem;
         font-weight: 800;
-        color: #0f172a;
+        color: #1b3127;
         margin: 0 0 4px 0;
         letter-spacing: -0.02em;
       }
       .page-subtitle {
         font-size: 0.95rem;
-        color: #64748b;
+        color: #748073;
         margin: 0;
       }
       .status-filters {
@@ -209,8 +211,8 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         padding: 7px 16px;
         border-radius: 9999px;
         background: #ffffff;
-        border: 1px solid #e2e8f0;
-        color: #64748b;
+        border: 1px solid #e2e8dc;
+        color: #748073;
         font-size: 0.85rem;
         font-weight: 600;
         cursor: pointer;
@@ -218,12 +220,12 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         transition: all 0.15s ease;
       }
       .filter-pill:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
+        background: #f6f8f2;
+        border-color: #d5dfd0;
       }
       .filter-pill.active {
-        background: #0f172a;
-        border-color: #0f172a;
+        background: #1b3127;
+        border-color: #1b3127;
         color: #ffffff;
       }
       .orders-grid {
@@ -233,7 +235,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .order-card {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e2e8dc;
         border-radius: 16px;
         padding: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -245,13 +247,13 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .order-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 12px 20px -5px rgba(15, 23, 42, 0.1);
-        border-color: #cbd5e1;
+        border-color: #d5dfd0;
       }
       .order-card-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f0f3eb;
         padding-bottom: 14px;
       }
       .order-ref {
@@ -262,12 +264,12 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .order-num {
         font-size: 1.05rem;
         font-weight: 800;
-        color: #0f172a;
+        color: #1b3127;
         letter-spacing: -0.01em;
       }
       .order-date {
         font-size: 0.775rem;
-        color: #94a3b8;
+        color: #8e998b;
       }
       .order-card-body {
         display: flex;
@@ -287,20 +289,20 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .meta-label {
         font-size: 0.7rem;
-        color: #94a3b8;
+        color: #8e998b;
         text-transform: uppercase;
         font-weight: 600;
       }
       .meta-value {
         font-size: 0.9rem;
         font-weight: 700;
-        color: #1e293b;
+        color: #29483a;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
       .text-total {
-        color: #f97316;
+        color: #234b36;
       }
       .items-preview {
         display: flex;
@@ -308,20 +310,20 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         gap: 6px;
       }
       .preview-tag {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #475569;
+        background: #f6f8f2;
+        border: 1px solid #e2e8dc;
+        color: #5c6c60;
         font-size: 0.775rem;
         padding: 3px 8px;
         border-radius: 6px;
         font-weight: 500;
       }
       .preview-tag.more {
-        background: #f1f5f9;
-        color: #64748b;
+        background: #f0f3eb;
+        color: #748073;
       }
       .order-card-footer {
-        border-top: 1px solid #f1f5f9;
+        border-top: 1px solid #f0f3eb;
         padding-top: 14px;
       }
       .btn-detail {
@@ -330,28 +332,28 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         justify-content: space-between;
         width: 100%;
         text-decoration: none;
-        color: #f97316;
+        color: #234b36;
         font-weight: 700;
         font-size: 0.9rem;
         padding: 6px 0;
         transition: color 0.15s;
       }
       .btn-detail:hover {
-        color: #ea580c;
+        color: #163b2b;
       }
       .loading-state,
       .empty-orders {
         text-align: center;
         padding: 64px 20px;
         background: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e2e8dc;
         border-radius: 16px;
       }
       .spinner {
         width: 36px;
         height: 36px;
-        border: 3px solid #e2e8f0;
-        border-top-color: #f97316;
+        border: 3px solid #e2e8dc;
+        border-top-color: #234b36;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 16px;
@@ -378,16 +380,17 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         border: none;
       }
       .btn-primary {
-        background: #f97316;
+        background: #234b36;
         color: #ffffff;
       }
       .btn-primary:hover {
-        background: #ea580c;
+        background: #163b2b;
       }
     `,
   ],
 })
 export class OrdersListComponent implements OnInit {
+  readonly authService = inject(AuthService);
   private readonly orderService = inject(OrderService);
 
   readonly EstadoPedido = EstadoPedido;

@@ -54,16 +54,16 @@ public class PedidoController {
      * Listado de pedidos: Solo accesible con Access Token valido.
      */
     @GetMapping("/pedidos")
-    public List<Pedido> listarPedidos() {
-        return pedidoService.listarTodos();
+    public List<Pedido> listarPedidos(Authentication authentication) {
+        return isAdmin(authentication) ? pedidoService.listarTodos() : pedidoService.listarPorUsuario(authentication.getName());
     }
 
     /**
      * Buscar un pedido por ID.
      */
     @GetMapping("/pedidos/{id}")
-    public ResponseEntity<Pedido> buscarPedidoPorId(@PathVariable Long id) {
-        return pedidoService.buscarPorId(id)
+    public ResponseEntity<Pedido> buscarPedidoPorId(@PathVariable Long id, Authentication authentication) {
+        return (isAdmin(authentication) ? pedidoService.buscarPorId(id) : pedidoService.buscarPorUsuario(id, authentication.getName()))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -83,5 +83,9 @@ public class PedidoController {
             // Retorna 400 Bad Request si no hay stock o los datos son invalidos
             return ResponseEntity.badRequest().body(Map.of("error", "Bad Request", "message", e.getMessage()));
         }
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 }

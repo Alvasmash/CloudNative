@@ -1,55 +1,40 @@
-name: Deploy Frontend to GitHub Pages
+name: Frontend GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-deploy.yml'
+    branches: [main]
+    paths: ['frontend/**', '.github/workflows/frontend-deploy.yml']
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: pedidos360-pages
+  cancel-in-progress: false
+
 jobs:
-  build-and-deploy:
+  frontend:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Descargar código
-        uses: actions/checkout@v4
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-
-      - name: Instalar dependencias
+      - run: npm ci
         working-directory: frontend
-        run: npm ci
-
-      - name: Compilar Angular
+      - run: npm test -- --watch=false --browsers=ChromeHeadless
         working-directory: frontend
-        run: npm run build -- --base-href /CloudNative/
-
-      - name: Localizar y preparar compilación
-        shell: bash
-        run: |
-          INDEX_FILE=$(find frontend/dist -type f -name index.html | head -n 1)
-          if [ -z "$INDEX_FILE" ]; then
-            echo "No se encontró index.html en frontend/dist"
-            exit 1
-          fi
-          PUBLISH_DIR=$(dirname "$INDEX_FILE")
-          cp "$PUBLISH_DIR/index.html" "$PUBLISH_DIR/404.html"
-          echo "PUBLISH_DIR=$PUBLISH_DIR" >> "$GITHUB_ENV"
-
-      - name: Publicar en GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - run: npm run build:pages
+        working-directory: frontend
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL || 'https://jfbxfcaajg.execute-api.us-east-1.amazonaws.com' }}
+          PAGES_BASE_URL: https://alvasmash.github.io/CloudNative/
+      - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ${{ env.PUBLISH_DIR }}
+          publish_dir: frontend/dist/pages/browser
           publish_branch: gh-pages
+          enable_jekyll: false

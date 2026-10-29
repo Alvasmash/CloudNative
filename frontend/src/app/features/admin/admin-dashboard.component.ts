@@ -8,6 +8,7 @@ import { EstadoPedido } from '../../core/models/estado-pedido.model';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
 import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
+import { KafkaMonitorComponent } from './kafka-monitor.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -20,6 +21,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
     StatusBadgeComponent,
     ConfirmModalComponent,
     ClpCurrencyPipe,
+    KafkaMonitorComponent,
   ],
   template: `
     <div class="admin-page">
@@ -285,6 +287,9 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         }
       </div>
 
+      <!-- Kafka audit stream -->
+      <app-kafka-monitor />
+
       <!-- Delete Confirmation Modal -->
       <app-confirm-modal
         [isOpen]="isDeleteModalOpen()"
@@ -328,13 +333,13 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .admin-title {
         font-size: 2.15rem;
         font-weight: 800;
-        color: #0f172a;
+        color: #1b3127;
         margin: 0 0 6px 0;
         letter-spacing: -0.025em;
       }
       .admin-subtitle {
         font-size: 0.95rem;
-        color: #64748b;
+        color: #748073;
         margin: 0;
       }
       .btn-refresh {
@@ -344,16 +349,16 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         padding: 10px 18px;
         border-radius: 10px;
         background: #ffffff;
-        border: 1px solid #cbd5e1;
-        color: #334155;
+        border: 1px solid #d5dfd0;
+        color: #3e5144;
         font-weight: 600;
         font-size: 0.875rem;
         cursor: pointer;
         transition: all 0.2s;
       }
       .btn-refresh:hover:not(:disabled) {
-        background: #f8fafc;
-        border-color: #94a3b8;
+        background: #f6f8f2;
+        border-color: #8e998b;
       }
       .spinning {
         animation: spin 1s linear infinite;
@@ -371,7 +376,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .kpi-card {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e2e8dc;
         border-radius: 16px;
         padding: 20px;
         display: flex;
@@ -391,7 +396,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f8fafc;
+        background: #f6f8f2;
       }
       .highlight-revenue .kpi-icon {
         background: #ecfdf5;
@@ -411,7 +416,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .kpi-label {
         font-size: 0.75rem;
-        color: #64748b;
+        color: #748073;
         text-transform: uppercase;
         font-weight: 600;
         letter-spacing: 0.04em;
@@ -419,16 +424,16 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .kpi-val {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #0f172a;
+        color: #1b3127;
         line-height: 1.2;
       }
       .kpi-sub {
         font-size: 0.725rem;
-        color: #94a3b8;
+        color: #8e998b;
       }
       .admin-table-container {
         background: #ffffff;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e2e8dc;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         overflow: hidden;
@@ -438,10 +443,10 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         justify-content: space-between;
         align-items: center;
         padding: 16px 20px;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid #f0f3eb;
         flex-wrap: wrap;
         gap: 14px;
-        background: #f8fafc;
+        background: #f6f8f2;
       }
       .search-box {
         position: relative;
@@ -453,20 +458,20 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .search-box svg {
         position: absolute;
         left: 12px;
-        color: #94a3b8;
+        color: #8e998b;
         pointer-events: none;
       }
       .search-input {
         width: 100%;
         padding: 8px 12px 8px 36px;
         border-radius: 8px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #d5dfd0;
         font-size: 0.875rem;
         background: #ffffff;
       }
       .search-input:focus {
         outline: none;
-        border-color: #f97316;
+        border-color: #234b36;
       }
       .filter-group {
         display: flex;
@@ -476,15 +481,15 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .filter-label {
         font-size: 0.8125rem;
         font-weight: 600;
-        color: #475569;
+        color: #5c6c60;
       }
       .filter-select {
         padding: 8px 12px;
         border-radius: 8px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #d5dfd0;
         background: #ffffff;
         font-size: 0.875rem;
-        color: #1e293b;
+        color: #29483a;
       }
       .table-responsive {
         overflow-x: auto;
@@ -498,21 +503,21 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .admin-table th {
         padding: 14px 18px;
         background: #ffffff;
-        color: #64748b;
+        color: #748073;
         font-weight: 600;
         font-size: 0.775rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        border-bottom: 2px solid #f1f5f9;
+        border-bottom: 2px solid #f0f3eb;
       }
       .admin-table td {
         padding: 14px 18px;
-        border-bottom: 1px solid #f1f5f9;
-        color: #334155;
+        border-bottom: 1px solid #f0f3eb;
+        color: #3e5144;
         vertical-align: middle;
       }
       .admin-table tr:hover {
-        background: #f8fafc;
+        background: #f6f8f2;
       }
       .order-code-link {
         color: #2563eb;
@@ -524,35 +529,35 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .customer-name {
         display: block;
-        color: #0f172a;
+        color: #1b3127;
       }
       .customer-email {
         font-size: 0.8rem;
-        color: #64748b;
+        color: #748073;
       }
       .date-cell {
         font-size: 0.8rem;
-        color: #64748b;
+        color: #748073;
         white-space: nowrap;
       }
       .total-cell {
         font-weight: 800;
-        color: #0f172a;
+        color: #1b3127;
         font-size: 0.95rem;
       }
       .status-changer-select {
         padding: 6px 10px;
         border-radius: 8px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid #d5dfd0;
         font-size: 0.8125rem;
         background: #ffffff;
-        color: #1e293b;
+        color: #29483a;
         cursor: pointer;
         font-weight: 500;
       }
       .status-changer-select:focus {
         outline: none;
-        border-color: #f97316;
+        border-color: #234b36;
       }
       .actions-cell {
         display: flex;
@@ -595,13 +600,13 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .empty-table {
         text-align: center;
         padding: 48px 20px;
-        color: #64748b;
+        color: #748073;
       }
       .spinner {
         width: 32px;
         height: 32px;
-        border: 3px solid #e2e8f0;
-        border-top-color: #f97316;
+        border: 3px solid #e2e8dc;
+        border-top-color: #234b36;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 12px;

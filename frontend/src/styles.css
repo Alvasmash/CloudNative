@@ -4,24 +4,24 @@
 
 :root {
   /* Brand Palette */
-  --primary: #f97316;
-  --primary-hover: #ea580c;
-  --primary-light: #ffedd5;
-  --primary-focus: rgba(249, 115, 22, 0.25);
+  --primary: #234b36;
+  --primary-hover: #163b2b;
+  --primary-light: #eef5e3;
+  --primary-focus: rgba(58, 103, 60, 0.25);
 
-  --secondary: #0f172a;
-  --secondary-light: #1e293b;
+  --secondary: #1b3127;
+  --secondary-light: #29483a;
 
   /* Neutrals & Surfaces */
-  --bg-main: #f8fafc;
+  --bg-main: #f6f8f2;
   --bg-card: #ffffff;
-  --border-color: #e2e8f0;
-  --border-focus: #cbd5e1;
+  --border-color: #e2e8dc;
+  --border-focus: #d5dfd0;
 
   /* Typography Colors */
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
+  --text-main: #1b3127;
+  --text-muted: #748073;
+  --text-light: #8e998b;
 
   /* Semantic Feedback */
   --success: #10b981;
@@ -105,14 +105,14 @@ textarea {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f0f3eb;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d5dfd0;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #8e998b;
 }
 
 /* Reusable UI Utilities */
@@ -179,3 +179,12 @@ textarea {
     padding: 0 16px;
   }
 }
+
+
+:root { --primary:#234b36; --primary-hover:#163b2b; --primary-light:#eef5e3; --primary-focus:#cee6ae; --accent:#d9f79a; --bg-main:#f6f8f2; --text-main:#1b3127; --font-sans:"Segoe UI",system-ui,sans-serif; --font-display:"Segoe UI",system-ui,sans-serif; }
+body { font-weight:400; }
+button, input, select, textarea { font:inherit; }
+button, a, input, select { -webkit-tap-highlight-color:transparent; }
+:focus-visible { outline:3px solid #789d48; outline-offset:4px; }
+::selection { background:#d9f79a; color:#17382c; }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important; } }

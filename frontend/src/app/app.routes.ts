@@ -1,16 +1,9 @@
 import { Routes } from '@angular/router';
 
-import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { RedirectComponent } from './redirect.component';
 export const routes: Routes = [
-  /*
-   * IMPORTANTE:
-   * Esta ruta es utilizada exclusivamente por MSAL
-   * como Redirect Bridge para loginPopup().
-   *
-   * NO debe tener authGuard ni adminGuard.
-   */
+  // Microsoft redirect callback; the application initializer validates the response.
   {
     path: 'redirect',
     component: RedirectComponent,
@@ -50,7 +43,6 @@ export const routes: Routes = [
       import('./features/orders/orders-list.component').then(
         (m) => m.OrdersListComponent,
       ),
-    canActivate: [authGuard],
     title: 'Mis Pedidos | Pedidos360',
   },
 
@@ -60,7 +52,6 @@ export const routes: Routes = [
       import('./features/orders/order-detail.component').then(
         (m) => m.OrderDetailComponent,
       ),
-    canActivate: [authGuard],
     title: 'Seguimiento de Pedido | Pedidos360',
   },
 

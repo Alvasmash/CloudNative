@@ -10,24 +10,21 @@ import { CommonModule } from '@angular/common';
       <div class="footer-container">
         <div class="footer-brand">
           <div class="footer-logo">
-            <span class="logo-icon">🍽️</span>
+            <span class="logo-icon" aria-hidden="true">◉</span>
             <strong>Pedidos<span class="text-orange">360</span></strong>
           </div>
           <p class="footer-desc">
-            Plataforma Cloud Native de gestión de pedidos gastronómicos en
-            tiempo real. Desarrollado para DSY1107 - Desarrollo Cloud Native I.
+            Buenos sabores, pedidos simples. Tu restaurante, en un solo lugar.
           </p>
         </div>
 
         <div class="footer-meta">
           <div class="architecture-pill">
             <span class="status-dot"></span>
-            Arquitectura: Angular 19 + MSAL &bull; Spring Boot 3.4 &bull; H2 /
-            RDS
+            Solo localhost &bull; Datos guardados en este equipo
           </div>
           <p class="copyright">
-            &copy; {{ currentYear }} Pedidos360 &bull; Duoc UC &bull; Evaluación
-            Parcial N° 1
+            &copy; {{ currentYear }} Pedidos360 &bull; Duoc UC &bull; Hecho para disfrutar
           </p>
         </div>
       </div>
@@ -36,10 +33,10 @@ import { CommonModule } from '@angular/common';
   styles: [
     `
       .footer {
-        background: #0b1325;
+        background: #edf1e6;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-        color: #94a3b8;
-        padding: 36px 0 24px 0;
+        color: #64735c;
+        padding: 28px 0;
         margin-top: auto;
       }
       .footer-container {
@@ -61,17 +58,17 @@ import { CommonModule } from '@angular/common';
         gap: 8px;
         font-size: 1.15rem;
         font-weight: 800;
-        color: #ffffff;
+        color: #234b36;
         margin-bottom: 8px;
       }
       .text-orange {
-        color: #f97316;
+        color: #234b36;
       }
       .footer-desc {
         font-size: 0.85rem;
         line-height: 1.5;
         margin: 0;
-        color: #64748b;
+        color: #748073;
       }
       .footer-meta {
         display: flex;
@@ -84,12 +81,12 @@ import { CommonModule } from '@angular/common';
         align-items: center;
         gap: 8px;
         padding: 6px 14px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.6);
+        border: 1px solid #dce4d4;
         border-radius: 9999px;
         font-size: 0.775rem;
         font-weight: 600;
-        color: #cbd5e1;
+        color: #748073;
       }
       .status-dot {
         width: 8px;
@@ -100,7 +97,7 @@ import { CommonModule } from '@angular/common';
       }
       .copyright {
         font-size: 0.8rem;
-        color: #64748b;
+        color: #748073;
         margin: 0;
       }
       @media (max-width: 768px) {

@@ -49,8 +49,7 @@ import { CartService } from '../core/services/cart.service';
             </svg>
             Menú
           </a>
-          @if (authService.isAuthenticated()) {
-            <a routerLink="/pedidos" routerLinkActive="active" class="nav-link">
+          <a routerLink="/pedidos" routerLinkActive="active" class="nav-link">
               <svg
                 viewBox="0 0 24 24"
                 width="18"
@@ -69,7 +68,6 @@ import { CartService } from '../core/services/cart.service';
               </svg>
               Mis Pedidos
             </a>
-          }
           @if (authService.isAdmin()) {
             <a
               routerLink="/admin"
@@ -118,30 +116,10 @@ import { CartService } from '../core/services/cart.service';
             }
           </a>
 
-          <!-- Demo Mode Role Switcher (Academic Evaluation Feature) -->
-          @if (authService.isDemoMode()) {
-            <div class="demo-role-selector">
-              <button
-                type="button"
-                class="role-switch-btn"
-                [class.role-admin]="authService.isAdmin()"
-                (click)="toggleDemoRole()"
-                title="Alternar rol para evaluación académica"
-              >
-                <span class="role-icon">{{
-                  authService.isAdmin() ? '🛡️' : '👤'
-                }}</span>
-                <span class="role-text">{{
-                  authService.isAdmin() ? 'ADMIN' : 'CLIENTE'
-                }}</span>
-              </button>
-            </div>
-          }
-
           <!-- User Profile / Auth State -->
           @if (authService.isAuthenticated()) {
             <div class="user-menu">
-              <div class="user-pill" (click)="toggleDropdown()">
+              <button type="button" class="user-pill" (click)="toggleDropdown()" [attr.aria-expanded]="isDropdownOpen()" aria-label="Abrir menú de usuario">
                 <div class="user-avatar">{{ userInitials }}</div>
                 <div class="user-info">
                   <span class="user-name">{{ authService.userName() }}</span>
@@ -159,7 +137,7 @@ import { CartService } from '../core/services/cart.service';
                 >
                   <path d="M6 9l6 6 6-6" />
                 </svg>
-              </div>
+              </button>
 
               @if (isDropdownOpen()) {
                 <div class="dropdown-menu">
@@ -204,7 +182,7 @@ import { CartService } from '../core/services/cart.service';
             type="button"
             class="mobile-toggle"
             (click)="toggleMobileNav()"
-            aria-label="Menú móvil"
+            aria-label="Menú móvil" [attr.aria-expanded]="isMobileNavOpen()"
           >
             <svg
               viewBox="0 0 24 24"
@@ -274,340 +252,7 @@ import { CartService } from '../core/services/cart.service';
       }
     </header>
   `,
-  styles: [
-    `
-      .navbar {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: rgba(15, 23, 42, 0.94);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        color: #f8fafc;
-      }
-      .nav-container {
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 0 24px;
-        height: 72px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        text-decoration: none;
-        color: #ffffff;
-        font-weight: 800;
-        font-size: 1.35rem;
-        letter-spacing: -0.02em;
-      }
-      .brand-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
-      }
-      .brand-highlight {
-        color: #f97316;
-      }
-      .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #94a3b8;
-        font-size: 0.925rem;
-        font-weight: 500;
-        transition: all 0.15s ease;
-      }
-      .nav-link:hover {
-        color: #f8fafc;
-        background: rgba(255, 255, 255, 0.06);
-      }
-      .nav-link.active {
-        color: #f8fafc;
-        background: rgba(255, 255, 255, 0.12);
-        font-weight: 600;
-      }
-      .nav-link-admin {
-        color: #fbbf24;
-      }
-      .nav-link-admin:hover {
-        color: #fde68a;
-        background: rgba(251, 191, 36, 0.12);
-      }
-      .admin-chip {
-        background: #f59e0b;
-        color: #0f172a;
-        font-size: 0.65rem;
-        font-weight: 800;
-        padding: 2px 6px;
-        border-radius: 4px;
-        letter-spacing: 0.05em;
-      }
-      .nav-actions {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-      .cart-btn {
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.06);
-        color: #f8fafc;
-        text-decoration: none;
-        transition: all 0.2s;
-      }
-      .cart-btn:hover {
-        background: rgba(249, 115, 22, 0.2);
-        color: #f97316;
-        transform: translateY(-1px);
-      }
-      .cart-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background: #f97316;
-        color: #ffffff;
-        font-size: 0.72rem;
-        font-weight: 800;
-        min-width: 19px;
-        height: 19px;
-        border-radius: 9999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 4px;
-        box-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
-        animation: pop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      @keyframes pop {
-        0% {
-          transform: scale(0.6);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-      .role-switch-btn {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 12px;
-        border-radius: 8px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        background: rgba(255, 255, 255, 0.06);
-        color: #94a3b8;
-        transition: all 0.2s;
-      }
-      .role-switch-btn:hover {
-        background: rgba(255, 255, 255, 0.12);
-        color: #ffffff;
-      }
-      .role-switch-btn.role-admin {
-        background: rgba(245, 158, 11, 0.15);
-        border-color: #f59e0b;
-        color: #fbbf24;
-      }
-      .user-menu {
-        position: relative;
-      }
-      .user-pill {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 4px 10px 4px 6px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 9999px;
-        cursor: pointer;
-        transition: all 0.15s ease;
-      }
-      .user-pill:hover {
-        background: rgba(255, 255, 255, 0.1);
-      }
-      .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        font-weight: 700;
-      }
-      .user-info {
-        display: flex;
-        flex-direction: column;
-        text-align: left;
-      }
-      .user-name {
-        font-size: 0.8125rem;
-        font-weight: 600;
-        color: #f8fafc;
-        line-height: 1.2;
-      }
-      .user-role {
-        font-size: 0.7rem;
-        color: #94a3b8;
-        line-height: 1.2;
-      }
-      .dropdown-menu {
-        position: absolute;
-        right: 0;
-        top: calc(100% + 8px);
-        background: #1e293b;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 12px;
-        padding: 8px 0;
-        min-width: 220px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-        z-index: 1001;
-        animation: dropDown 0.15s ease-out;
-      }
-      @keyframes dropDown {
-        from {
-          opacity: 0;
-          transform: translateY(-6px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .dropdown-header {
-        padding: 10px 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-      .dropdown-header strong {
-        font-size: 0.875rem;
-        color: #f8fafc;
-      }
-      .dropdown-header small {
-        font-size: 0.75rem;
-        color: #94a3b8;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .dropdown-divider {
-        height: 1px;
-        background: rgba(255, 255, 255, 0.08);
-        margin: 6px 0;
-      }
-      .dropdown-item {
-        display: block;
-        width: 100%;
-        padding: 8px 16px;
-        text-align: left;
-        font-size: 0.875rem;
-        color: #cbd5e1;
-        text-decoration: none;
-        background: none;
-        border: none;
-        cursor: pointer;
-        transition: all 0.15s;
-      }
-      .dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: #ffffff;
-      }
-      .text-danger {
-        color: #f87171 !important;
-      }
-      .text-danger:hover {
-        background: rgba(239, 68, 68, 0.15) !important;
-        color: #fecaca !important;
-      }
-      .btn-login {
-        background: #f97316;
-        color: #ffffff;
-        padding: 8px 18px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-size: 0.875rem;
-        font-weight: 600;
-        transition: all 0.2s;
-      }
-      .btn-login:hover {
-        background: #ea580c;
-      }
-      .mobile-toggle {
-        display: none;
-        background: none;
-        border: none;
-        color: #f8fafc;
-        cursor: pointer;
-        padding: 4px;
-      }
-      .mobile-nav {
-        display: none;
-        flex-direction: column;
-        background: #0f172a;
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 12px 24px;
-        gap: 10px;
-      }
-      .mobile-nav-link {
-        padding: 10px 0;
-        color: #cbd5e1;
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 0.95rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        background: none;
-        border: none;
-        text-align: left;
-        cursor: pointer;
-      }
-      .text-warning {
-        color: #fbbf24 !important;
-      }
-      .text-primary {
-        color: #f97316 !important;
-      }
-      @media (max-width: 900px) {
-        .nav-links,
-        .user-info {
-          display: none;
-        }
-        .mobile-toggle {
-          display: block;
-        }
-        .mobile-nav {
-          display: flex;
-        }
-      }
-    `,
-  ],
+  styleUrl: './header.component.css',
 })
 export class HeaderComponent {
   readonly authService = inject(AuthService);
@@ -644,10 +289,6 @@ export class HeaderComponent {
     this.isMobileNavOpen.set(false);
   }
 
-  toggleDemoRole(): void {
-    const nextRole = this.authService.isAdmin() ? 'USER' : 'ADMIN';
-    this.authService.setDemoUser(nextRole);
-  }
 
   logout(): void {
     this.closeDropdown();

@@ -4,6 +4,7 @@ import {
   provideHttpClientTesting,
   HttpTestingController,
 } from '@angular/common/http/testing';
+import { AuthService } from '../auth/auth.service';
 import { OrderService } from './order.service';
 import { PedidoCreateDTO } from '../models/pedido-create.model';
 import { EstadoPedido } from '../models/estado-pedido.model';
@@ -17,6 +18,7 @@ describe('OrderService', () => {
     TestBed.configureTestingModule({
       providers: [
         OrderService,
+        { provide: AuthService, useValue: { isAuthenticated: () => true } },
         provideHttpClient(),
         provideHttpClientTesting(),
       ],

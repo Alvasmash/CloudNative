@@ -113,7 +113,7 @@ import { ToastService, Toast } from '../../core/services/toast.service';
           0 8px 10px -6px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(12px);
         animation: slideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-        color: #1e293b;
+        color: #29483a;
         border-left: 5px solid;
       }
       @keyframes slideIn {

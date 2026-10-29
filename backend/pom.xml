@@ -81,6 +81,11 @@
       <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.kafka</groupId>
+      <artifactId>spring-kafka</artifactId>
+    </dependency>
+
     <!-- Testing: Herramientas para ejecutar pruebas automatizadas (JUnit 5, MockMvc) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

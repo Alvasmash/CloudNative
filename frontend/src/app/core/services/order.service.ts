@@ -1,144 +1,61 @@
-﻿import { Injectable, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Pedido } from '../models/pedido.model';
 import { PedidoCreateDTO } from '../models/pedido-create.model';
-import { EstadoPedido } from '../models/estado-pedido.model';
 import { ToastService } from './toast.service';
-
-const DEMO_ORDERS_KEY = 'pedidos360_demo_orders';
-
-// Pedido inicial de demostracion sincronizado con data.sql
-const INITIAL_DEMO_ORDER: Pedido = {
-  id: 1,
-  numeroPedido: 'ORD-2026-001',
-  clienteNombre: 'Juan Pérez',
-  clienteEmail: 'juan.perez@duocuc.cl',
-  fechaCreacion: new Date(Date.now() - 3600000 * 4).toISOString(),
-  estado: EstadoPedido.ENTREGADO,
-  total: 16480.0,
-  items: [
-    {
-      id: 1,
-      productoId: 1,
-      productoNombre: 'Pizza Margherita',
-      cantidad: 1,
-      precioUnitario: 8990.0,
-      subtotal: 8990.0,
-    },
-    {
-      id: 2,
-      productoId: 3,
-      productoNombre: 'Hamburguesa Doble Smash',
-      cantidad: 1,
-      precioUnitario: 7490.0,
-      subtotal: 7490.0,
-    },
-  ],
-};
-
-@Injectable({
-  providedIn: 'root',
-})
+import { AuthService } from '../auth/auth.service';
+const GUEST_KEY = 'pedidos360_guest_access';
+const GUEST_IDS = 'pedidos360_guest_order_ids';
+@Injectable({providedIn:'root'})
 export class OrderService {
   private readonly http = inject(HttpClient);
-  private readonly toastService = inject(ToastService);
+  private readonly toast = inject(ToastService);
+  private readonly auth = inject(AuthService);
   private readonly apiUrl = `${environment.apiUrl}/api/pedidos`;
+  private readonly guestUrl = `${environment.apiUrl}/public/guest/pedidos`;
 
-  private getStoredDemoOrders(): Pedido[] {
-    const raw = sessionStorage.getItem(DEMO_ORDERS_KEY);
-    if (!raw) {
-      const initial = [INITIAL_DEMO_ORDER];
-      sessionStorage.setItem(DEMO_ORDERS_KEY, JSON.stringify(initial));
-      return initial;
-    }
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return [INITIAL_DEMO_ORDER];
-    }
+  private guestToken(create = false): string | null {
+    const stored = sessionStorage.getItem(GUEST_KEY);
+    if (stored && /^[A-Za-z0-9_-]{43}$/.test(stored)) return stored;
+    if (!create) return null;
+    const bytes = crypto.getRandomValues(new Uint8Array(32));
+    const token = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    sessionStorage.setItem(GUEST_KEY, token);
+    return token;
   }
-
-  private saveDemoOrder(pedido: Pedido): void {
-    const current = this.getStoredDemoOrders();
-    const updated = [pedido, ...current];
-    sessionStorage.setItem(DEMO_ORDERS_KEY, JSON.stringify(updated));
+  private guestIds(): number[] {
+    try { const ids = JSON.parse(sessionStorage.getItem(GUEST_IDS) || '[]'); return Array.isArray(ids) ? ids.filter(Number.isInteger) : []; }
+    catch { return []; }
   }
-
-  /**
-   * Crea un nuevo pedido enviando PedidoCreateDTO
-   * Requiere el scope delegado recurso.write en el backend
-   */
+  private rememberGuestOrders(orders: Pedido[]): void {
+    sessionStorage.setItem(GUEST_IDS, JSON.stringify([...new Set([...this.guestIds(), ...orders.map(order => order.id)])]));
+  }
+  private guestOrders(): Observable<Pedido[]> {
+    const token = this.guestToken();
+    return token ? this.http.get<Pedido[]>(this.guestUrl, {headers: {'X-Guest-Token': token}})
+      .pipe(tap(orders => this.rememberGuestOrders(orders))) : of([]);
+  }
   crearPedido(dto: PedidoCreateDTO): Observable<Pedido> {
-    return this.http.post<Pedido>(this.apiUrl, dto).pipe(
-      tap((nuevoPedido) => {
-        this.toastService.success(
-          `Pedido creado con éxito: ${nuevoPedido.numeroPedido}`,
-        );
-      }),
-      catchError((err) => {
-        console.warn(
-          'Fallo llamada HTTP crearPedido, usando simulador local:',
-          err,
-        );
-        const demoId = Math.floor(Math.random() * 9000) + 1000;
-        const fakeOrder: Pedido = {
-          id: demoId,
-          numeroPedido: `PED-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
-          clienteNombre: dto.clienteNombre,
-          clienteEmail: dto.clienteEmail,
-          fechaCreacion: new Date().toISOString(),
-          estado: EstadoPedido.PENDIENTE,
-          total: dto.items.reduce((sum, item) => sum + item.cantidad * 8990, 0),
-          items: dto.items.map((i, idx) => ({
-            id: idx + 1,
-            productoId: i.productoId,
-            productoNombre: `Producto #${i.productoId}`,
-            cantidad: i.cantidad,
-            precioUnitario: 8990,
-            subtotal: i.cantidad * 8990,
-          })),
-        };
-        this.saveDemoOrder(fakeOrder);
-        this.toastService.success(
-          `Pedido registrado localmente: ${fakeOrder.numeroPedido}`,
-        );
-        return of(fakeOrder);
-      }),
-    );
+    const request = this.auth.isAuthenticated()
+      ? this.http.post<Pedido>(this.apiUrl, dto)
+      : this.http.post<Pedido>(this.guestUrl, dto, {headers: {'X-Guest-Token': this.guestToken(true)!}})
+        .pipe(tap(order => this.rememberGuestOrders([order])));
+    return request.pipe(tap(order => this.toast.success(`Pedido creado con éxito: ${order.numeroPedido}`)));
   }
-
-  /**
-   * Obtiene todos los pedidos del usuario autenticado
-   */
   getMisPedidos(): Observable<Pedido[]> {
-    return this.http.get<Pedido[]>(this.apiUrl).pipe(
-      catchError((err) => {
-        console.warn(
-          'Fallo llamada HTTP getMisPedidos, usando pedidos de sesion:',
-          err,
-        );
-        return of(this.getStoredDemoOrders());
-      }),
-    );
+    if (!this.auth.isAuthenticated()) return this.guestOrders();
+    return forkJoin([this.http.get<Pedido[]>(this.apiUrl), this.guestOrders()]).pipe(
+      map(([owned, guest]) => [...new Map([...owned, ...guest].map(order => [order.id, order])).values()]
+        .sort((a, b) => Date.parse(b.fechaCreacion) - Date.parse(a.fechaCreacion))));
   }
-
-  /**
-   * Obtiene el detalle de un pedido por su ID
-   */
   getPedidoById(id: number): Observable<Pedido | null> {
-    return this.http.get<Pedido>(`${this.apiUrl}/${id}`).pipe(
-      catchError((err) => {
-        console.warn(
-          `Fallo HTTP getPedidoById(${id}), buscando en pedidos locales:`,
-          err,
-        );
-        const found =
-          this.getStoredDemoOrders().find((p) => p.id === Number(id)) || null;
-        return of(found);
-      }),
-    );
+    const token = this.guestToken();
+    if (token && (!this.auth.isAuthenticated() || this.guestIds().includes(id))) {
+      return this.http.get<Pedido>(`${this.guestUrl}/${id}`, {headers: {'X-Guest-Token': token}});
+    }
+    return this.auth.isAuthenticated() ? this.http.get<Pedido>(`${this.apiUrl}/${id}`) : of(null);
   }
 }

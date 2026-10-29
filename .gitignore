@@ -37,3 +37,13 @@ yarn-error.log*
 Thumbs.db
 [Dd]esktop.ini
 .DS_Store
+
+# Local persistent database
+backend/data/
+.local/
+
+.env.*
+!.env.example
+
+# Generated Pages build configuration
+frontend/src/environments/environment.pages.generated.ts

@@ -19,7 +19,8 @@ FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 # Crear usuario sin privilegios por seguridad
-RUN groupadd -r spring && useradd -r -g spring spring
+RUN groupadd -r spring && useradd -r -g spring spring \
+    && mkdir -p /app/data && chown spring:spring /app/data
 USER spring:spring
 
 # Copiar el archivo JAR generado desde la etapa previa
@@ -29,7 +30,8 @@ COPY --from=builder /workspace/backend/target/pedidos360-backend-0.0.1-SNAPSHOT.
 EXPOSE 8080
 
 # Variables de entorno predeterminadas para conexion en red Docker
-ENV SPRING_PROFILES_ACTIVE=docker \
+ENV SPRING_PROFILES_ACTIVE=local \
+    SERVER_ADDRESS=0.0.0.0 \
     SERVER_PORT=8080 \
     SPRING_RABBITMQ_HOST=rabbit1 \
     SPRING_RABBITMQ_PORT=5672
