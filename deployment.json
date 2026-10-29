@@ -1,0 +1,6 @@
+{
+  "apiUrl": "https://jfbxfcaajg.execute-api.us-east-1.amazonaws.com",
+  "siteUrl": "https://alvasmash.github.io/CloudNative/",
+  "microsoftRedirectUri": "https://alvasmash.github.io/CloudNative/redirect",
+  "routing": "hash"
+}
