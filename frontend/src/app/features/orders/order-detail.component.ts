@@ -174,14 +174,14 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        color: #748073;
+        color: #596982;
         text-decoration: none;
         font-weight: 600;
         font-size: 0.9rem;
         transition: color 0.15s;
       }
       .btn-back:hover {
-        color: #1b3127;
+        color: #17243d;
       }
       .detail-container {
         display: flex;
@@ -189,7 +189,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         gap: 24px;
       }
       .summary-banner {
-        background: linear-gradient(135deg, #1b3127 0%, #29483a 100%);
+        background: linear-gradient(135deg, #17243d 0%, #33496d 100%);
         border-radius: 20px;
         padding: 36px 32px;
         color: #ffffff;
@@ -208,7 +208,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .banner-tag {
         font-size: 0.75rem;
         font-weight: 700;
-        color: #477448;
+        color: #4b5770;
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
@@ -220,12 +220,12 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .order-timestamp {
         font-size: 0.875rem;
-        color: #8e998b;
+        color: #5c6d87;
       }
       .timeline-card,
       .card {
         background: #ffffff;
-        border: 1px solid #e2e8dc;
+        border: 1px solid #dce4f1;
         border-radius: 16px;
         padding: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -233,7 +233,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .card-section-title {
         font-size: 1.1rem;
         font-weight: 800;
-        color: #1b3127;
+        color: #17243d;
         margin: 0 0 20px 0;
       }
       .detail-grid {
@@ -252,30 +252,30 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .items-table th {
         text-align: left;
-        color: #748073;
+        color: #596982;
         font-weight: 600;
         font-size: 0.775rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
         padding-bottom: 12px;
-        border-bottom: 2px solid #f0f3eb;
+        border-bottom: 2px solid #e8edf6;
       }
       .items-table td {
         padding: 14px 0;
-        border-bottom: 1px solid #f0f3eb;
-        color: #3e5144;
+        border-bottom: 1px solid #e8edf6;
+        color: #394356;
       }
       .item-product-name {
         display: block;
-        color: #1b3127;
+        color: #17243d;
       }
       .item-ref {
-        color: #8e998b;
+        color: #5c6d87;
         font-size: 0.75rem;
       }
       .item-subtotal-cell {
         font-weight: 700;
-        color: #1b3127;
+        color: #17243d;
       }
       .text-center {
         text-align: center;
@@ -285,14 +285,14 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .foot-label {
         font-weight: 700;
-        color: #1b3127;
+        color: #17243d;
         font-size: 1rem;
         padding-top: 16px;
       }
       .foot-total {
         font-weight: 900;
         font-size: 1.4rem;
-        color: #234b36;
+        color: var(--primary);
         padding-top: 16px;
       }
       .info-list {
@@ -307,27 +307,27 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .info-label {
         font-size: 0.75rem;
-        color: #8e998b;
+        color: #5c6d87;
         text-transform: uppercase;
         font-weight: 600;
       }
       .info-val {
         font-size: 0.95rem;
-        color: #1b3127;
+        color: #17243d;
       }
       .loading-box,
       .not-found-card {
         text-align: center;
         padding: 64px 24px;
         background: #ffffff;
-        border: 1px solid #e2e8dc;
+        border: 1px solid #dce4f1;
         border-radius: 16px;
       }
       .spinner {
         width: 36px;
         height: 36px;
-        border: 3px solid #e2e8dc;
-        border-top-color: #234b36;
+        border: 3px solid #dce4f1;
+        border-top-color: var(--primary);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 16px;
@@ -349,7 +349,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         cursor: pointer;
       }
       .btn-primary {
-        background: #234b36;
+        background: var(--primary);
         color: #ffffff;
       }
       @media (max-width: 800px) {

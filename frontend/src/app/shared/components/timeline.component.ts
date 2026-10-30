@@ -116,8 +116,8 @@ interface Step {
         width: 36px;
         height: 36px;
         border-radius: 50%;
-        background: #e2e8dc;
-        color: #748073;
+        background: #dce4f1;
+        color: #596982;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -134,7 +134,7 @@ interface Step {
         left: 50%;
         width: 100%;
         height: 3px;
-        background: #e2e8dc;
+        background: #dce4f1;
         z-index: 1;
         transform: translateY(-50%);
         transition: background 0.3s ease;
@@ -147,9 +147,9 @@ interface Step {
         color: #ffffff;
       }
       .step-item.active .node-circle {
-        background: #234b36;
+        background: var(--primary);
         color: #ffffff;
-        box-shadow: 0 0 0 5px rgba(58, 103, 60, 0.25);
+        box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.25);
         animation: pulse 2s infinite;
       }
       @keyframes pulse {
@@ -165,16 +165,16 @@ interface Step {
         display: block;
         font-weight: 700;
         font-size: 0.875rem;
-        color: #29483a;
+        color: #33496d;
         margin-bottom: 2px;
       }
       .step-item.active .step-title {
-        color: #234b36;
+        color: var(--primary);
       }
       .step-desc {
         display: block;
         font-size: 0.75rem;
-        color: #748073;
+        color: #596982;
       }
       .cancelled-banner {
         display: flex;

@@ -113,7 +113,7 @@ import { ToastService, Toast } from '../../core/services/toast.service';
           0 8px 10px -6px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(12px);
         animation: slideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-        color: #29483a;
+        color: #33496d;
         border-left: 5px solid;
       }
       @keyframes slideIn {
@@ -129,7 +129,7 @@ import { ToastService, Toast } from '../../core/services/toast.service';
       .toast-success {
         background: #ecfdf5;
         border-color: #10b981;
-        color: #065f46;
+        color: #1d2b48;
       }
       .toast-error {
         background: #fef2f2;

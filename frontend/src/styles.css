@@ -3,25 +3,27 @@
    ========================================================================== */
 
 :root {
+  --hero-bg: #101e42;
+  --accent: #9cdbff;
   /* Brand Palette */
-  --primary: #234b36;
-  --primary-hover: #163b2b;
-  --primary-light: #eef5e3;
-  --primary-focus: rgba(58, 103, 60, 0.25);
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --primary-light: #eaf1ff;
+  --primary-focus: rgba(37, 99, 235, 0.25);
 
-  --secondary: #1b3127;
-  --secondary-light: #29483a;
+  --secondary: #17243d;
+  --secondary-light: #33496d;
 
   /* Neutrals & Surfaces */
-  --bg-main: #f6f8f2;
+  --bg-main: #f4f7fc;
   --bg-card: #ffffff;
-  --border-color: #e2e8dc;
-  --border-focus: #d5dfd0;
+  --border-color: #dce4f1;
+  --border-focus: #cbd7e9;
 
   /* Typography Colors */
-  --text-main: #1b3127;
-  --text-muted: #748073;
-  --text-light: #8e998b;
+  --text-main: #17243d;
+  --text-muted: #596982;
+  --text-light: #5c6d87;
 
   /* Semantic Feedback */
   --success: #10b981;
@@ -105,14 +107,14 @@ textarea {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f0f3eb;
+  background: #e8edf6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d5dfd0;
+  background: #cbd7e9;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #8e998b;
+  background: #5c6d87;
 }
 
 /* Reusable UI Utilities */
@@ -181,10 +183,10 @@ textarea {
 }
 
 
-:root { --primary:#234b36; --primary-hover:#163b2b; --primary-light:#eef5e3; --primary-focus:#cee6ae; --accent:#d9f79a; --bg-main:#f6f8f2; --text-main:#1b3127; --font-sans:"Segoe UI",system-ui,sans-serif; --font-display:"Segoe UI",system-ui,sans-serif; }
+:root { --primary:#1d4ed8; --primary-hover:#1e40af; --primary-light:#eaf1ff; --primary-focus:#bfc6d5; --accent:#9cdbff; --bg-main:#f4f7fc; --text-main:#17243d; --font-sans:"Segoe UI",system-ui,sans-serif; --font-display:"Segoe UI",system-ui,sans-serif; }
 body { font-weight:400; }
 button, input, select, textarea { font:inherit; }
 button, a, input, select { -webkit-tap-highlight-color:transparent; }
-:focus-visible { outline:3px solid #789d48; outline-offset:4px; }
-::selection { background:#d9f79a; color:#17382c; }
+:focus-visible { outline:3px solid #586684; outline-offset:4px; }
+::selection { background:#9cdbff; color:#18315c; }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important; } }

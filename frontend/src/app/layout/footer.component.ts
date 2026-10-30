@@ -34,9 +34,9 @@ import { environment } from '../../environments/environment';
   styles: [
     `
       .footer {
-        background: #edf1e6;
+        background: #e3e9f4;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-        color: #64735c;
+        color: #53617c;
         padding: 28px 0;
         margin-top: auto;
       }
@@ -59,17 +59,17 @@ import { environment } from '../../environments/environment';
         gap: 8px;
         font-size: 1.15rem;
         font-weight: 800;
-        color: #234b36;
+        color: var(--primary);
         margin-bottom: 8px;
       }
       .text-orange {
-        color: #234b36;
+        color: var(--primary);
       }
       .footer-desc {
         font-size: 0.85rem;
         line-height: 1.5;
         margin: 0;
-        color: #748073;
+        color: #596982;
       }
       .footer-meta {
         display: flex;
@@ -83,11 +83,11 @@ import { environment } from '../../environments/environment';
         gap: 8px;
         padding: 6px 14px;
         background: rgba(255, 255, 255, 0.6);
-        border: 1px solid #dce4d4;
+        border: 1px solid #cdd7eb;
         border-radius: 9999px;
         font-size: 0.775rem;
         font-weight: 600;
-        color: #748073;
+        color: #596982;
       }
       .status-dot {
         width: 8px;
@@ -98,7 +98,7 @@ import { environment } from '../../environments/environment';
       }
       .copyright {
         font-size: 0.8rem;
-        color: #748073;
+        color: #596982;
         margin: 0;
       }
       @media (max-width: 768px) {

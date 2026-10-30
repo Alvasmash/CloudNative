@@ -127,12 +127,12 @@ import { CommonModule } from '@angular/common';
       .modal-title {
         font-size: 1.125rem;
         font-weight: 700;
-        color: #1b3127;
+        color: #17243d;
         margin: 0 0 6px 0;
       }
       .modal-desc {
         font-size: 0.9rem;
-        color: #748073;
+        color: #596982;
         margin: 0;
         line-height: 1.5;
       }
@@ -151,11 +151,11 @@ import { CommonModule } from '@angular/common';
         transition: all 0.15s ease;
       }
       .btn-secondary {
-        background: #f0f3eb;
-        color: #5c6c60;
+        background: #e8edf6;
+        color: #505d78;
       }
       .btn-secondary:hover {
-        background: #e2e8dc;
+        background: #dce4f1;
       }
       .btn-danger {
         background: #dc2626;
@@ -165,11 +165,11 @@ import { CommonModule } from '@angular/common';
         background: #b91c1c;
       }
       .btn-primary {
-        background: #234b36;
+        background: var(--primary);
         color: #ffffff;
       }
       .btn-primary:hover {
-        background: #163b2b;
+        background: #1e40af;
       }
     `,
   ],

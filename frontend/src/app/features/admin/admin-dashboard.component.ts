@@ -336,13 +336,13 @@ import { AdminNavComponent } from './admin-nav.component';
       .admin-title {
         font-size: 2.15rem;
         font-weight: 800;
-        color: #1b3127;
+        color: #17243d;
         margin: 0 0 6px 0;
         letter-spacing: -0.025em;
       }
       .admin-subtitle {
         font-size: 0.95rem;
-        color: #748073;
+        color: #596982;
         margin: 0;
       }
       .btn-refresh {
@@ -352,16 +352,16 @@ import { AdminNavComponent } from './admin-nav.component';
         padding: 10px 18px;
         border-radius: 10px;
         background: #ffffff;
-        border: 1px solid #d5dfd0;
-        color: #3e5144;
+        border: 1px solid #cbd7e9;
+        color: #394356;
         font-weight: 600;
         font-size: 0.875rem;
         cursor: pointer;
         transition: all 0.2s;
       }
       .btn-refresh:hover:not(:disabled) {
-        background: #f6f8f2;
-        border-color: #8e998b;
+        background: #f4f7fc;
+        border-color: #5c6d87;
       }
       .spinning {
         animation: spin 1s linear infinite;
@@ -379,7 +379,7 @@ import { AdminNavComponent } from './admin-nav.component';
       }
       .kpi-card {
         background: #ffffff;
-        border: 1px solid #e2e8dc;
+        border: 1px solid #dce4f1;
         border-radius: 16px;
         padding: 20px;
         display: flex;
@@ -399,7 +399,7 @@ import { AdminNavComponent } from './admin-nav.component';
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f6f8f2;
+        background: #f4f7fc;
       }
       .highlight-revenue .kpi-icon {
         background: #ecfdf5;
@@ -419,7 +419,7 @@ import { AdminNavComponent } from './admin-nav.component';
       }
       .kpi-label {
         font-size: 0.75rem;
-        color: #748073;
+        color: #596982;
         text-transform: uppercase;
         font-weight: 600;
         letter-spacing: 0.04em;
@@ -427,16 +427,16 @@ import { AdminNavComponent } from './admin-nav.component';
       .kpi-val {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #1b3127;
+        color: #17243d;
         line-height: 1.2;
       }
       .kpi-sub {
         font-size: 0.725rem;
-        color: #8e998b;
+        color: #5c6d87;
       }
       .admin-table-container {
         background: #ffffff;
-        border: 1px solid #e2e8dc;
+        border: 1px solid #dce4f1;
         border-radius: 16px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         overflow: hidden;
@@ -446,10 +446,10 @@ import { AdminNavComponent } from './admin-nav.component';
         justify-content: space-between;
         align-items: center;
         padding: 16px 20px;
-        border-bottom: 1px solid #f0f3eb;
+        border-bottom: 1px solid #e8edf6;
         flex-wrap: wrap;
         gap: 14px;
-        background: #f6f8f2;
+        background: #f4f7fc;
       }
       .search-box {
         position: relative;
@@ -461,20 +461,20 @@ import { AdminNavComponent } from './admin-nav.component';
       .search-box svg {
         position: absolute;
         left: 12px;
-        color: #8e998b;
+        color: #5c6d87;
         pointer-events: none;
       }
       .search-input {
         width: 100%;
         padding: 8px 12px 8px 36px;
         border-radius: 8px;
-        border: 1px solid #d5dfd0;
+        border: 1px solid #cbd7e9;
         font-size: 0.875rem;
         background: #ffffff;
       }
       .search-input:focus {
         outline: none;
-        border-color: #234b36;
+        border-color: var(--primary);
       }
       .filter-group {
         display: flex;
@@ -484,15 +484,15 @@ import { AdminNavComponent } from './admin-nav.component';
       .filter-label {
         font-size: 0.8125rem;
         font-weight: 600;
-        color: #5c6c60;
+        color: #505d78;
       }
       .filter-select {
         padding: 8px 12px;
         border-radius: 8px;
-        border: 1px solid #d5dfd0;
+        border: 1px solid #cbd7e9;
         background: #ffffff;
         font-size: 0.875rem;
-        color: #29483a;
+        color: #33496d;
       }
       .table-responsive {
         overflow-x: auto;
@@ -506,21 +506,21 @@ import { AdminNavComponent } from './admin-nav.component';
       .admin-table th {
         padding: 14px 18px;
         background: #ffffff;
-        color: #748073;
+        color: #596982;
         font-weight: 600;
         font-size: 0.775rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        border-bottom: 2px solid #f0f3eb;
+        border-bottom: 2px solid #e8edf6;
       }
       .admin-table td {
         padding: 14px 18px;
-        border-bottom: 1px solid #f0f3eb;
-        color: #3e5144;
+        border-bottom: 1px solid #e8edf6;
+        color: #394356;
         vertical-align: middle;
       }
       .admin-table tr:hover {
-        background: #f6f8f2;
+        background: #f4f7fc;
       }
       .order-code-link {
         color: #2563eb;
@@ -532,35 +532,35 @@ import { AdminNavComponent } from './admin-nav.component';
       }
       .customer-name {
         display: block;
-        color: #1b3127;
+        color: #17243d;
       }
       .customer-email {
         font-size: 0.8rem;
-        color: #748073;
+        color: #596982;
       }
       .date-cell {
         font-size: 0.8rem;
-        color: #748073;
+        color: #596982;
         white-space: nowrap;
       }
       .total-cell {
         font-weight: 800;
-        color: #1b3127;
+        color: #17243d;
         font-size: 0.95rem;
       }
       .status-changer-select {
         padding: 6px 10px;
         border-radius: 8px;
-        border: 1px solid #d5dfd0;
+        border: 1px solid #cbd7e9;
         font-size: 0.8125rem;
         background: #ffffff;
-        color: #29483a;
+        color: #33496d;
         cursor: pointer;
         font-weight: 500;
       }
       .status-changer-select:focus {
         outline: none;
-        border-color: #234b36;
+        border-color: var(--primary);
       }
       .actions-cell {
         display: flex;
@@ -603,13 +603,13 @@ import { AdminNavComponent } from './admin-nav.component';
       .empty-table {
         text-align: center;
         padding: 48px 20px;
-        color: #748073;
+        color: #596982;
       }
       .spinner {
         width: 32px;
         height: 32px;
-        border: 3px solid #e2e8dc;
-        border-top-color: #234b36;
+        border: 3px solid #dce4f1;
+        border-top-color: var(--primary);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 12px;

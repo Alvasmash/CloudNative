@@ -49,12 +49,12 @@ interface KafkaStatus { status: 'CONNECTED' | 'DISCONNECTED' | 'DISABLED'; topic
     } </section>
   `,
   styles: [`
-    .kafka-panel{margin-top:28px;background:white;border:1px solid #e2e8dc;border-radius:18px;padding:24px}
-    .kafka-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}.eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;color:#64735c}h2{font-size:23px;letter-spacing:-.035em;margin:6px 0 0}
-    button{border:1px solid #dce5d4;border-radius:9px;background:#edf5e1;padding:11px 16px;font-size:12px;font-weight:600;color:#234b36;cursor:pointer}button:disabled{opacity:.6;cursor:wait}
-    .kafka-summary{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin:22px 0;font-size:12px}.connection{background:#fff3dd;color:#855b17;border-radius:30px;padding:7px 11px;display:flex;gap:7px}.connection.connected{background:#eaf5dd;color:#315b24}code{font-size:11px;overflow-wrap:anywhere}.muted,.footnote{color:#64735c;font-size:12px}.footnote{margin-top:18px;font-size:11px;line-height:1.6}
-    .notice{background:#fff6e6;color:#73521b;padding:13px;border-radius:9px;font-size:13px;margin-top:14px}.empty{color:#64735c;font-size:13px;padding:20px 0;line-height:1.7}
-    .event-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#64735c;background:#f5f8ef}td,th{padding:13px 12px;border-bottom:1px solid #edf1e6}td{font-size:12px;color:#3e5144}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .kafka-panel{margin-top:28px;background:white;border:1px solid #dce4f1;border-radius:18px;padding:24px}
+    .kafka-heading{display:flex;justify-content:space-between;align-items:center;gap:16px}.eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;color:#53617c}h2{font-size:23px;letter-spacing:-.035em;margin:6px 0 0}
+    button{border:1px solid #ced8eb;border-radius:9px;background:#e3e8f3;padding:11px 16px;font-size:12px;font-weight:600;color:var(--primary);cursor:pointer}button:disabled{opacity:.6;cursor:wait}
+    .kafka-summary{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin:22px 0;font-size:12px}.connection{background:#fff3dd;color:#855b17;border-radius:30px;padding:7px 11px;display:flex;gap:7px}.connection.connected{background:#e0e6f2;color:#25375a}code{font-size:11px;overflow-wrap:anywhere}.muted,.footnote{color:#53617c;font-size:12px}.footnote{margin-top:18px;font-size:11px;line-height:1.6}
+    .notice{background:#fff6e6;color:#73521b;padding:13px;border-radius:9px;font-size:13px;margin-top:14px}.empty{color:#53617c;font-size:13px;padding:20px 0;line-height:1.7}
+    .event-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#53617c;background:#eff2f8}td,th{padding:13px 12px;border-bottom:1px solid #e3e9f4}td{font-size:12px;color:#394356}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     @media(max-width:600px){.kafka-panel{padding:18px}.kafka-heading{align-items:start;flex-direction:column}.kafka-summary{gap:10px}h2{font-size:21px}}
   `],
 })

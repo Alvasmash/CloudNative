@@ -191,13 +191,13 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .page-title {
         font-size: 2rem;
         font-weight: 800;
-        color: #1b3127;
+        color: #17243d;
         margin: 0 0 4px 0;
         letter-spacing: -0.02em;
       }
       .page-subtitle {
         font-size: 0.95rem;
-        color: #748073;
+        color: #596982;
         margin: 0;
       }
       .status-filters {
@@ -211,8 +211,8 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         padding: 7px 16px;
         border-radius: 9999px;
         background: #ffffff;
-        border: 1px solid #e2e8dc;
-        color: #748073;
+        border: 1px solid #dce4f1;
+        color: #596982;
         font-size: 0.85rem;
         font-weight: 600;
         cursor: pointer;
@@ -220,12 +220,12 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         transition: all 0.15s ease;
       }
       .filter-pill:hover {
-        background: #f6f8f2;
-        border-color: #d5dfd0;
+        background: #f4f7fc;
+        border-color: #cbd7e9;
       }
       .filter-pill.active {
-        background: #1b3127;
-        border-color: #1b3127;
+        background: #17243d;
+        border-color: #17243d;
         color: #ffffff;
       }
       .orders-grid {
@@ -235,7 +235,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .order-card {
         background: #ffffff;
-        border: 1px solid #e2e8dc;
+        border: 1px solid #dce4f1;
         border-radius: 16px;
         padding: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
@@ -247,13 +247,13 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .order-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 12px 20px -5px rgba(15, 23, 42, 0.1);
-        border-color: #d5dfd0;
+        border-color: #cbd7e9;
       }
       .order-card-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        border-bottom: 1px solid #f0f3eb;
+        border-bottom: 1px solid #e8edf6;
         padding-bottom: 14px;
       }
       .order-ref {
@@ -264,12 +264,12 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .order-num {
         font-size: 1.05rem;
         font-weight: 800;
-        color: #1b3127;
+        color: #17243d;
         letter-spacing: -0.01em;
       }
       .order-date {
         font-size: 0.775rem;
-        color: #8e998b;
+        color: #5c6d87;
       }
       .order-card-body {
         display: flex;
@@ -289,20 +289,20 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .meta-label {
         font-size: 0.7rem;
-        color: #8e998b;
+        color: #5c6d87;
         text-transform: uppercase;
         font-weight: 600;
       }
       .meta-value {
         font-size: 0.9rem;
         font-weight: 700;
-        color: #29483a;
+        color: #33496d;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
       .text-total {
-        color: #234b36;
+        color: var(--primary);
       }
       .items-preview {
         display: flex;
@@ -310,20 +310,20 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         gap: 6px;
       }
       .preview-tag {
-        background: #f6f8f2;
-        border: 1px solid #e2e8dc;
-        color: #5c6c60;
+        background: #f4f7fc;
+        border: 1px solid #dce4f1;
+        color: #505d78;
         font-size: 0.775rem;
         padding: 3px 8px;
         border-radius: 6px;
         font-weight: 500;
       }
       .preview-tag.more {
-        background: #f0f3eb;
-        color: #748073;
+        background: #e8edf6;
+        color: #596982;
       }
       .order-card-footer {
-        border-top: 1px solid #f0f3eb;
+        border-top: 1px solid #e8edf6;
         padding-top: 14px;
       }
       .btn-detail {
@@ -332,28 +332,28 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         justify-content: space-between;
         width: 100%;
         text-decoration: none;
-        color: #234b36;
+        color: var(--primary);
         font-weight: 700;
         font-size: 0.9rem;
         padding: 6px 0;
         transition: color 0.15s;
       }
       .btn-detail:hover {
-        color: #163b2b;
+        color: #1e40af;
       }
       .loading-state,
       .empty-orders {
         text-align: center;
         padding: 64px 20px;
         background: #ffffff;
-        border: 1px solid #e2e8dc;
+        border: 1px solid #dce4f1;
         border-radius: 16px;
       }
       .spinner {
         width: 36px;
         height: 36px;
-        border: 3px solid #e2e8dc;
-        border-top-color: #234b36;
+        border: 3px solid #dce4f1;
+        border-top-color: var(--primary);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 16px;
@@ -380,11 +380,11 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         border: none;
       }
       .btn-primary {
-        background: #234b36;
+        background: var(--primary);
         color: #ffffff;
       }
       .btn-primary:hover {
-        background: #163b2b;
+        background: #1e40af;
       }
     `,
   ],
