@@ -66,4 +66,3 @@ export class AdminProductsComponent implements OnInit {
   }
   photo(product: Producto) { return product.imagenUrl || 'images/product-' + (product.id >= 1 && product.id <= 6 ? product.id : 1) + '.jpg'; }
 }
-

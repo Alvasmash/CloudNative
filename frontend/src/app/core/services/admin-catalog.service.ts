@@ -13,4 +13,3 @@ export class AdminCatalogService {
   update(id: number, product: ProductDraft) { return this.http.put<Producto>(this.url + '/' + id, product); }
   remove(id: number) { return this.http.delete<void>(this.url + '/' + id); }
 }
-
