@@ -14,7 +14,8 @@ public class LocalAuthConfig {
     JwtDecoder localJwtDecoder(
             @Value("${app.security.issuer}") String issuer,
             @Value("${app.security.audience}") String audience,
-            @Value("${app.security.jwk-set-uri:https://login.microsoftonline.com/16c2a7cf-f000-475f-a847-f95ee0b36404/discovery/v2.0/keys}") String keys) {
+            @Value("${app.security.jwk-set-uri:https://login.microsoftonline.com/16c2a7cf-f000-475f-a847-f95ee0b36404/discovery/v2.0/keys}") String keys,
+            cl.duoc.pedidos360.accounts.CustomerSessions sessions) {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(keys).build();
         OAuth2TokenValidator<Jwt> identity = token -> {
             boolean valid = token.getAudience().stream().anyMatch(Set.of(audience, "api://" + audience)::contains)
@@ -25,6 +26,6 @@ public class LocalAuthConfig {
                 new OAuth2Error("invalid_token", "Token de usuario o audiencia no valida", null));
         };
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefaultWithIssuer(issuer), identity));
-        return decoder;
+        return token -> token.startsWith("p360_") ? sessions.decode(token) : decoder.decode(token);
     }
 }

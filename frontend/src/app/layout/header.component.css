@@ -14,3 +14,5 @@
 @media(max-width: 1080px) { .nav-links { margin-left: 10px; }.user-info { display: none; }.nav-actions { gap: 10px; } }
 @media(max-width: 800px) { .nav-links,.demo-role-selector { display: none; }.mobile-toggle { display: block; }.nav-container { height: 70px; padding: 0 18px; gap: 12px; }.nav-actions { gap: 10px; }.brand-name { font-size: 21px; }.brand-icon { width: 32px; height: 32px; }.btn-login { padding: 11px 12px; font-size: 10px; }.cart-btn { width: 36px; height: 36px; }.user-pill > svg { display: none; } }
 @media(min-width: 801px) { .mobile-nav { display: none; } }
+
+.btn-register{font-size:12px;font-weight:700;color:#315839;white-space:nowrap}.btn-register:focus-visible{outline:3px solid #779851;outline-offset:3px}@media(max-width:600px){.nav-actions>.btn-register{display:none}}

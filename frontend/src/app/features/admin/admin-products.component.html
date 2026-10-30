@@ -1,0 +1,55 @@
+<main class="management-page">
+  <app-admin-nav />
+  <header class="page-heading"><div><span class="eyebrow">TU NEGOCIO, AL DÍA</span><h1>Productos</h1>
+    <p>Cuida tu carta. Actualiza precios, disponibilidad y cada detalle.</p></div>
+    <button class="primary" type="button" (click)="edit()" [disabled]="saving()">＋ Agregar producto</button>
+  </header>
+  <div class="summary"><span><strong>{{products().length}}</strong> productos en el menú</span>
+    <span><strong>{{outOfStock()}}</strong> sin stock</span><a routerLink="/menu">Ver menú ↗</a></div>
+  @if (error()) { <p class="error" role="alert">{{error()}}</p> }
+  @if (editorOpen()) {
+    <section class="editor" aria-labelledby="editor-title"><h2 id="editor-title">{{editingId() === null ? 'Nuevo producto' : 'Editar producto'}}</h2>
+      <form #productForm="ngForm" (ngSubmit)="save(productForm)">
+        <fieldset [disabled]="saving()"><div class="form-grid">
+          <label>Nombre<input id="product-name" name="nombre" [(ngModel)]="draft.nombre" required maxlength="120" placeholder="Ej. Pizza de la casa"></label>
+          <label>Categoría<input name="categoria" [(ngModel)]="draft.categoria" required maxlength="80" list="categories" placeholder="Ej. Pizzas">
+            <datalist id="categories"><option value="Pizzas"></option><option value="Hamburguesas"></option><option value="Bebidas"></option><option value="Postres"></option></datalist></label>
+          <label>Precio en CLP<input name="precio" type="number" [(ngModel)]="draft.precio" required min="1" max="99999999" step="1" pattern="[0-9]+"></label>
+          <label>Stock disponible<input name="stock" type="number" [(ngModel)]="draft.stock" required min="0" max="1000000" step="1" pattern="[0-9]+"></label>
+          <label class="wide">Descripción<textarea name="descripcion" [(ngModel)]="draft.descripcion" required maxlength="500" rows="3" placeholder="Ingredientes y detalles del producto"></textarea></label>
+        </div>
+        <p class="field-title" id="photo-label">Imagen del producto</p><div class="photo-options" role="group" aria-labelledby="photo-label">
+          @for (number of photos; track number) {
+            <label class="photo-option"><input type="radio" name="imagenUrl" [(ngModel)]="draft.imagenUrl" [value]="'images/product-' + number + '.jpg'" [attr.aria-label]="'Imagen ' + number">
+              <img [src]="'images/product-' + number + '.jpg'" alt="" width="88" height="66"></label>
+          }
+        </div>
+        <div class="form-actions"><button type="button" class="secondary" (click)="editorOpen.set(false)">Cancelar</button>
+          <button class="primary" type="submit" [disabled]="productForm.invalid || saving() || !draft.nombre.trim() || !draft.descripcion.trim() || !draft.categoria.trim()">{{saving() ? 'Guardando…' : 'Guardar producto'}}</button></div>
+        </fieldset>
+      </form>
+    </section>
+  }
+  <section class="catalog" aria-labelledby="catalog-title"><div class="catalog-bar"><h2 id="catalog-title">Tu catálogo</h2>
+    <label class="search-label"><span class="sr-only">Buscar productos por nombre o categoría</span>
+      <input type="search" placeholder="Buscar nombre o categoría…" [ngModel]="search()" (ngModelChange)="search.set($event)"></label>
+    <button type="button" class="secondary" (click)="load()" [disabled]="loading()">Actualizar</button>
+  </div>
+  @if (loading()) { <p class="empty" role="status">Cargando productos…</p> }
+  @else {
+    <div class="product-list">
+    @for (product of filtered(); track product.id) {
+      <article class="product-row"><img [src]="photo(product)" alt="" width="88" height="76"><div class="product-info">
+        <span class="category">{{product.categoria}}</span><h3>{{product.nombre}}</h3><p>{{product.descripcion}}</p>
+        <div class="product-meta"><strong>{{product.precio | clp}}</strong><span [class.no-stock]="product.stock === 0">{{product.stock === 0 ? 'Agotado' : product.stock + ' disponibles'}}</span></div></div>
+        <div class="row-actions"><button type="button" class="secondary" (click)="edit(product)" [attr.aria-label]="'Editar ' + product.nombre">Editar</button>
+          <button type="button" class="danger" (click)="askDelete(product)" [attr.aria-label]="'Eliminar ' + product.nombre">Eliminar</button></div></article>
+    } @empty { <div class="empty"><h3>{{search() ? 'No encontramos productos' : 'Tu carta está por comenzar'}}</h3><p>{{search() ? 'Prueba otro nombre o categoría.' : 'Agrega tu primer producto para mostrarlo en el menú.'}}</p></div> }
+    </div>
+  }</section>
+  <dialog #deleteDialog (cancel)="$event.preventDefault(); cancelDelete()" aria-labelledby="delete-title">
+    <h2 id="delete-title">¿Eliminar producto?</h2><p>«{{selected()?.nombre}}» dejará de aparecer en el menú. Los pedidos anteriores conservarán sus detalles.</p>
+    <div class="form-actions"><button type="button" class="secondary" (click)="cancelDelete()" [disabled]="deleting()">Cancelar</button>
+      <button type="button" class="danger" (click)="remove()" [disabled]="deleting()">{{deleting() ? 'Eliminando…' : 'Sí, eliminar producto'}}</button></div>
+  </dialog>
+</main>

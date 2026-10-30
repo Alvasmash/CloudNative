@@ -174,6 +174,7 @@ import { CartService } from '../core/services/cart.service';
               }
             </div>
           } @else {
+            <a routerLink="/registro" class="btn-register">Registrarse</a>
             <a routerLink="/login" class="btn btn-login"> Iniciar Sesión </a>
           }
 
@@ -241,6 +242,7 @@ import { CartService } from '../core/services/cart.service';
               Cerrar Sesión
             </button>
           } @else {
+            <a routerLink="/registro" (click)="closeMobileNav()" class="mobile-nav-link">Registrarse</a>
             <a
               routerLink="/login"
               (click)="closeMobileNav()"

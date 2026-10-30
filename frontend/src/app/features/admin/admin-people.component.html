@@ -1,0 +1,17 @@
+<main class="people-page"><app-admin-nav />
+  <header><span class="eyebrow">CONOCE A TU COMUNIDAD</span><h1>Personas</h1><p>Cuentas registradas por correo y personas que han iniciado sesión con Microsoft.</p></header>
+  <section class="people-card"><div class="toolbar"><div><strong>{{data().totalPersonas}}</strong> {{query ? 'resultados' : 'personas registradas'}}</div>
+    <form (ngSubmit)="load()"><label><span class="sr-only">Buscar por nombre o correo</span><input name="query" type="search" [(ngModel)]="query" maxlength="120" placeholder="Buscar nombre o correo…"></label><button type="submit" [disabled]="loading()">Buscar</button></form>
+    <button type="button" (click)="load(data().pagina)" [disabled]="loading()">Actualizar</button></div>
+    @if(error()){<p class="error" role="alert">{{error()}}</p>}
+    @if(loading()){<p class="empty" role="status">Cargando personas…</p>}
+    @else{<div class="table-wrap"><table><thead><tr><th>Persona</th><th>Acceso</th><th>Rol</th><th>Estado</th><th>Registro</th><th>Último acceso</th></tr></thead><tbody>
+      @for(person of data().personas;track person.id){<tr><td><strong>{{person.nombre}}</strong><span class="email">{{person.email}}</span></td><td>{{person.proveedor === 'MICROSOFT' ? 'Microsoft' : 'Correo'}}</td>
+      <td><span class="badge" [class.admin]="person.rol === 'ADMIN'">{{person.rol === 'ADMIN' ? 'Administrador' : 'Usuario'}}</span></td>
+      <td><span [class.pending]="!person.verificado">{{person.verificado ? 'Verificado' : 'Por verificar'}}</span></td>
+      <td>{{person.fechaRegistro | date:'dd/MM/yyyy HH:mm'}}</td><td>{{person.ultimoAcceso ? (person.ultimoAcceso | date:'dd/MM/yyyy HH:mm') : 'Aún no ingresa'}}</td></tr>}
+      @empty{<tr><td colspan="6" class="empty">No hay personas que mostrar. Las cuentas aparecerán después de registrarse o iniciar sesión con Microsoft.</td></tr>}
+    </tbody></table></div>}
+    <footer><span>Página {{data().pagina + 1}} de {{data().totalPaginas || 1}}</span><div><button type="button" [disabled]="loading() || data().pagina === 0" (click)="load(data().pagina-1)">Anterior</button><button type="button" [disabled]="loading() || data().pagina+1 >= data().totalPaginas" (click)="load(data().pagina+1)">Siguiente</button></div></footer>
+  </section><p class="privacy-note">Los visitantes sin cuenta no aparecen en este listado. Los permisos de administrador se validan con Microsoft.</p>
+</main>

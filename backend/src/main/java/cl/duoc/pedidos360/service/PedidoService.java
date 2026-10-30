@@ -103,7 +103,7 @@ public class PedidoService {
 
         // Itera cada producto solicitado para validar stock y calcular montos
         for (ItemPedidoDTO itemDto : dto.getItems()) {
-            Producto producto = productoRepository.findById(itemDto.getProductoId())
+            Producto producto = productoRepository.findActiveForUpdate(itemDto.getProductoId())
                     .orElseThrow(() -> new IllegalArgumentException("Producto con ID " + itemDto.getProductoId() + " no encontrado en el menu"));
 
             if (producto.getStock() < itemDto.getCantidad()) {

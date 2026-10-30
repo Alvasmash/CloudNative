@@ -82,7 +82,7 @@ class PedidoEventProducerAndServiceTest {
     @DisplayName("2. PedidoService.crearPedido persiste la orden y dispara publicacion del evento de dominio")
     void crearPedido_shouldPersistAndPublishEvent() {
         Producto pizza = new Producto(1L, "Pizza Margherita", "Salsa y queso", 8990.0, "Pizzas", 20);
-        when(productoRepository.findById(1L)).thenReturn(Optional.of(pizza));
+        when(productoRepository.findActiveForUpdate(1L)).thenReturn(Optional.of(pizza));
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> {
             Pedido p = invocation.getArgument(0);
             p.setId(99L);

@@ -1,0 +1,7 @@
+<main class="verify-page"><section><span class="mark" aria-hidden="true">{{done() ? '✓' : '✉'}}</span>
+@if(done()){<h1>Tu correo está verificado</h1><p>Tu cuenta está lista. Inicia sesión y disfruta tu próximo pedido.</p><a class="primary" routerLink="/login">Iniciar sesión</a>}
+@else{<h1>Verifica tu correo</h1><p>Confirma que solicitaste una cuenta en Pedidos360.</p>
+@if(validToken){<button type="button" class="primary" (click)="verify()" [disabled]="busy()">{{busy() ? 'Verificando…' : 'Confirmar mi correo'}}</button>}
+@else{<p class="error" role="alert">Este enlace no es válido. Abre el enlace completo que recibiste por correo.</p>}
+@if(error()){<p class="error" role="alert">{{error()}}</p>}<a routerLink="/registro" class="resend">Solicitar un nuevo correo</a>}
+<a routerLink="/menu" class="back">Volver al menú</a></section></main>

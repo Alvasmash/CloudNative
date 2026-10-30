@@ -34,9 +34,11 @@ import jakarta.validation.Valid;
 public class PedidoController {
 
     private final PedidoService pedidoService;
+    private final cl.duoc.pedidos360.accounts.AccountService accounts;
 
-    public PedidoController(PedidoService pedidoService) {
+    public PedidoController(PedidoService pedidoService, cl.duoc.pedidos360.accounts.AccountService accounts) {
         this.pedidoService = pedidoService;
+        this.accounts = accounts;
     }
 
     /**
@@ -44,6 +46,8 @@ public class PedidoController {
      */
     @GetMapping("/profile")
     public Map<String, Object> profile(Authentication authentication) {
+        if (authentication instanceof org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken token)
+            accounts.recordMicrosoft(token.getToken(), isAdmin(authentication));
         return Map.of(
                 "status", "ok",
                 "user", authentication.getName(),

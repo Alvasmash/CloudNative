@@ -36,7 +36,8 @@ class MicrosoftJwtDecoderTests {
     @AfterAll static void stop() { server.stop(0); }
     @BeforeEach void decoder() {
         decoder = new LocalAuthConfig().localJwtDecoder(ISSUER, AUDIENCE,
-            "http://127.0.0.1:" + server.getAddress().getPort() + "/keys");
+            "http://127.0.0.1:" + server.getAddress().getPort() + "/keys",
+            org.mockito.Mockito.mock(cl.duoc.pedidos360.accounts.CustomerSessions.class));
     }
     private String token(String issuer, String audience, String tenant, Instant expires, RSAKey signingKey) throws Exception {
         JWTClaimsSet claims = new JWTClaimsSet.Builder().issuer(issuer).audience(audience)

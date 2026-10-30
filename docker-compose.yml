@@ -24,6 +24,15 @@ volumes:
   kafka_data:
 
 services:
+  mailpit:
+    image: axllent/mailpit:v1.27.4
+    container_name: pedidos360-mailpit
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    networks:
+      - pedidos360-network
+
   kafka:
     image: apache/kafka:3.9.1
     container_name: pedidos360-local-kafka
@@ -131,6 +140,14 @@ services:
       APP_KAFKA_ENABLED: 'true'
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SERVER_ADDRESS: 0.0.0.0
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_AUTH: ${SMTP_AUTH:-false}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      MAIL_FROM: ${MAIL_FROM:-registro@pedidos360.local}
+      FRONTEND_URL: http://localhost:4200
       ALLOWED_ORIGINS: http://localhost:4200,http://127.0.0.1:4200
     ports:
       - "127.0.0.1:8080:8080"

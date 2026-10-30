@@ -1,0 +1,14 @@
+<main class="account-page"><section class="account-story"><span class="eyebrow">TU PRÓXIMO FAVORITO TE ESPERA</span><h1>Buenos momentos.<br><em>Una cuenta para disfrutarlos.</em></h1><p>Regístrate para guardar tus pedidos y seguirlos desde cualquier dispositivo.</p><img src="images/product-2.jpg" alt="Pizza recién preparada" width="480" height="280"><a routerLink="/menu">← Volver al menú sin registrarme</a></section>
+<section class="account-card" aria-labelledby="register-title"><span class="pill">EMPIEZA AQUÍ</span><h2 id="register-title">Crea tu cuenta</h2><p>Te enviaremos un enlace para verificar tu correo.</p>
+@if(localMail()){<aside class="mail-note" role="status"><strong>Prueba local de correo</strong><p>Los mensajes se guardan en el buzón de prueba; todavía no se envían a correos reales.</p><a href="http://localhost:8025" target="_blank" rel="noopener">Abrir buzón de prueba ↗</a></aside>}
+@if(message()){<div class="success" role="status">{{message()}}</div>}
+@if(error()){<p class="error" role="alert">{{error()}}</p>}
+<form #registerForm="ngForm" (ngSubmit)="register(registerForm)"><fieldset [disabled]="busy()">
+<label>Nombre<input name="nombre" [(ngModel)]="nombre" required maxlength="120" autocomplete="name" placeholder="Tu nombre"></label>
+<label>Correo electrónico<input #emailInput="ngModel" name="email" type="email" [(ngModel)]="email" required email maxlength="254" autocomplete="email" placeholder="nombre@correo.com"></label>
+<label>Contraseña<input name="password" type="password" [(ngModel)]="password" required minlength="12" maxlength="72" autocomplete="new-password" aria-describedby="password-help"></label><small id="password-help">Entre 12 y 72 caracteres.</small>
+<label>Repite tu contraseña<input name="confirmation" type="password" [(ngModel)]="confirmation" required minlength="12" maxlength="72" autocomplete="new-password"></label>
+<button type="submit" class="primary" [disabled]="registerForm.invalid || busy() || !nombre.trim()">{{busy() ? 'Enviando…' : 'Crear cuenta y verificar correo'}}</button></fieldset></form>
+<p class="signin">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+<button type="button" class="text-button" (click)="resend()" [disabled]="busy() || !email || emailInput.invalid">Reenviar correo de verificación</button>
+<p class="footnote">El registro es opcional. Puedes seguir comprando como invitado.</p></section></main>

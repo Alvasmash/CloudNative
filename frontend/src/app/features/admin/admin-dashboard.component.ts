@@ -9,6 +9,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal.component';
 import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
 import { KafkaMonitorComponent } from './kafka-monitor.component';
+import { AdminNavComponent } from './admin-nav.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -22,9 +23,11 @@ import { KafkaMonitorComponent } from './kafka-monitor.component';
     ConfirmModalComponent,
     ClpCurrencyPipe,
     KafkaMonitorComponent,
+    AdminNavComponent,
   ],
   template: `
     <div class="admin-page">
+      <app-admin-nav />
       <!-- Admin Header -->
       <div class="admin-header">
         <div>

@@ -3,6 +3,10 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
 import { RedirectComponent } from './redirect.component';
 export const routes: Routes = [
+  {path: 'registro', loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent), title: 'Crear cuenta | Pedidos360'},
+  {path: 'verificar-correo', loadComponent: () => import('./features/auth/verify-email.component').then(m => m.VerifyEmailComponent), title: 'Verificar correo | Pedidos360'},
+  {path: 'admin/productos', loadComponent: () => import('./features/admin/admin-products.component').then(m => m.AdminProductsComponent), canActivate: [adminGuard], title: 'Productos | Administración'},
+  {path: 'admin/personas', loadComponent: () => import('./features/admin/admin-people.component').then(m => m.AdminPeopleComponent), canActivate: [adminGuard], title: 'Personas | Administración'},
   // Microsoft redirect callback; the application initializer validates the response.
   {
     path: 'redirect',

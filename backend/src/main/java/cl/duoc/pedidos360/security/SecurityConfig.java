@@ -97,7 +97,8 @@ public class SecurityConfig {
     @ConditionalOnMissingBean(JwtDecoder.class)
     JwtDecoder jwtDecoder(
             @Value("${app.security.issuer}") String issuer,
-            @Value("${app.security.audience}") String audience) {
+            @Value("${app.security.audience}") String audience,
+            cl.duoc.pedidos360.accounts.CustomerSessions sessions) {
 
         NimbusJwtDecoder decoder;
         if (issuer.contains("{tenantid}") || issuer.contains("common")) {
@@ -113,7 +114,7 @@ public class SecurityConfig {
         OAuth2TokenValidator<Jwt> audienceValidator = new AudienceValidator(audience);
 
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(defaultValidator, audienceValidator));
-        return decoder;
+        return token -> token.startsWith("p360_") ? sessions.decode(token) : decoder.decode(token);
     }
 
     /**

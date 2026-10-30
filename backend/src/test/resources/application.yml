@@ -2,6 +2,9 @@ server:
   port: 8080
 
 spring:
+  mail:
+    host: localhost
+    port: 1025
   application:
     name: pedidos360-backend-test
 

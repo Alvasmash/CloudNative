@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { OPTIONAL_SERVER_FEATURE } from '../../core/interceptors/optional-feature.context';
 
 interface KafkaEvent {
   event: { eventId: string; type: string; pedidoId: number; numeroPedido: string; estado: string; occurredAt: string };
@@ -18,9 +19,11 @@ interface KafkaStatus { status: 'CONNECTED' | 'DISCONNECTED' | 'DISABLED'; topic
     <section class="kafka-panel" aria-labelledby="kafka-title">
       <div class="kafka-heading">
         <div><span class="eyebrow">ACTIVIDAD DE PEDIDOS</span><h2 id="kafka-title">Eventos en Kafka</h2></div>
-        <button type="button" (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Consultando…' : 'Actualizar eventos' }}</button>
+        <button type="button" (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Consultando…' : unavailable() ? 'Comprobar de nuevo' : 'Actualizar eventos' }}</button>
       </div>
-      @if (error()) {
+      @if (unavailable()) {
+        <p class="notice" role="status">Este servidor no ofrece el panel de Kafka. Para consultar sus eventos hay que actualizar el backend publicado con la integración de Kafka.</p>
+      } @else if (error()) {
         <p class="notice" role="alert">No pudimos consultar Kafka. Puedes reintentar con Actualizar eventos.</p>
       } @else { @if (data(); as stream) {
         <div class="kafka-summary">
@@ -29,7 +32,7 @@ interface KafkaStatus { status: 'CONNECTED' | 'DISCONNECTED' | 'DISABLED'; topic
           </span>
           @if (stream.topic) { <code>{{ stream.topic }}</code><span class="muted">Retención: {{ stream.retentionDays }} días</span> }
         </div>
-        @if (stream.status === 'DISCONNECTED') { <p class="notice">Kafka no responde. Los pedidos siguen disponibles; revisa el contenedor pedidos360-local-kafka.</p> }
+        @if (stream.status === 'DISCONNECTED') { <p class="notice">No se pudo conectar con el broker de Kafka de este servidor.</p> }
         @if (stream.events.length) {
           <div class="event-scroll"><table>
             <caption class="sr-only">Últimos eventos recibidos por el consumidor de auditoría</caption>
@@ -60,14 +63,23 @@ export class KafkaMonitorComponent implements OnInit {
   readonly data = signal<KafkaStatus | null>(null);
   readonly loading = signal(false);
   readonly error = signal(false);
+  readonly unavailable = signal(false);
   ngOnInit(): void { this.refresh(); }
   refresh(): void {
     if (this.loading()) return;
     this.loading.set(true);
     this.error.set(false);
-    this.http.get<KafkaStatus>(`${environment.apiUrl}/api/admin/kafka`).subscribe({
+    this.unavailable.set(false);
+    this.http.get<KafkaStatus>(`${environment.apiUrl}/api/admin/kafka`, {
+      context: new HttpContext().set(OPTIONAL_SERVER_FEATURE, true),
+    }).subscribe({
       next: value => { this.data.set(value); this.loading.set(false); },
-      error: () => { this.error.set(true); this.loading.set(false); },
+      error: error => {
+        this.data.set(null);
+        this.unavailable.set(error.status === 404);
+        this.error.set(error.status !== 404);
+        this.loading.set(false);
+      },
     });
   }
   eventName(type: string): string {

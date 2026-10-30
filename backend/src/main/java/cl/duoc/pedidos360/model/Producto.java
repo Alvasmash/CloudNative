@@ -43,6 +43,17 @@ public class Producto {
     @Column(nullable = false)
     private Integer stock;
 
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean activo = true;
+
+    @Column(length = 120)
+    private String imagenUrl;
+
+    public boolean isActivo() { return activo; }
+    public void setActivo(boolean activo) { this.activo = activo; }
+    public String getImagenUrl() { return imagenUrl; }
+    public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
+
     // Constructor vacioo obligatorio requerido por Hibernate/JPA
     public Producto() {}
 

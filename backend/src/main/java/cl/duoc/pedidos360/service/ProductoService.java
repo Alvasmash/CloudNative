@@ -29,16 +29,47 @@ public class ProductoService {
 
     // Retorna todo el catalogo de platos y bebidas
     public List<Producto> listarTodos() {
-        return productoRepository.findAll();
+        return productoRepository.findByActivoTrueOrderByIdDesc();
     }
 
     // Busca un producto especifico por su ID
     public Optional<Producto> buscarPorId(Long id) {
-        return productoRepository.findById(id);
+        return productoRepository.findByIdAndActivoTrue(id);
     }
 
     // Filtra productos por categora (ej: "Pizzas")
     public List<Producto> listarPorCategoria(String categoria) {
-        return productoRepository.findByCategoriaIgnoreCase(categoria);
+        return productoRepository.findByCategoriaIgnoreCaseAndActivoTrue(categoria);
+    }
+
+    @Transactional
+    public Producto crear(cl.duoc.pedidos360.dto.ProductoWriteDTO dto) {
+        return productoRepository.save(aplicar(new Producto(), dto));
+    }
+
+    @Transactional
+    public Producto actualizar(Long id, cl.duoc.pedidos360.dto.ProductoWriteDTO dto) {
+        return productoRepository.save(aplicar(requerir(id), dto));
+    }
+
+    @Transactional
+    public void eliminar(Long id) {
+        // Preserve historical orders and prevent stale carts from purchasing this product.
+        requerir(id).setActivo(false);
+    }
+
+    private Producto requerir(Long id) {
+        return productoRepository.findActiveForUpdate(id).orElseThrow(() ->
+            new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Producto no encontrado"));
+    }
+
+    private Producto aplicar(Producto producto, cl.duoc.pedidos360.dto.ProductoWriteDTO dto) {
+        producto.setNombre(dto.nombre().trim());
+        producto.setDescripcion(dto.descripcion().trim());
+        producto.setPrecio(dto.precio());
+        producto.setCategoria(dto.categoria().trim());
+        producto.setStock(dto.stock());
+        producto.setImagenUrl(dto.imagenUrl() == null || dto.imagenUrl().isBlank() ? null : dto.imagenUrl());
+        return producto;
     }
 }

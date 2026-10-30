@@ -13,6 +13,8 @@ public class AdminEmailPolicy {
     private final AdminIdentityRepository identities;
     public AdminEmailPolicy(AdminIdentityRepository identities) { this.identities = identities; }
 
+    public boolean isReservedEmail(String email) { return ADMINS.contains(email.trim().toLowerCase(Locale.ROOT)); }
+
     public String email(Jwt token) {
         for (String claim : new String[]{"preferred_username", "upn", "email"}) {
             String value = token.getClaimAsString(claim);

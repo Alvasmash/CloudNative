@@ -8,7 +8,7 @@ if (environment.useHashRouting && !window.location.hash) {
   const base = new URL(document.baseURI);
   const oldPath = window.location.pathname.startsWith(base.pathname)
     ? window.location.pathname.slice(base.pathname.length).replace(/\/$/, '') : '';
-  if (/^(menu|carrito|pedidos(?:\/\d+)?|admin|login)$/.test(oldPath)) {
+  if (/^(menu|carrito|pedidos(?:\/\d+)?|admin(?:\/(?:productos|personas))?|login|registro|verificar-correo)$/.test(oldPath)) {
     window.history.replaceState(null, '', base.href + '#/' + oldPath + window.location.search);
   }
 }
