@@ -15,7 +15,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return request$.pipe(catchError((error: HttpErrorResponse) => {
     if (req.context.get(FORM_HANDLES_ERRORS)) return throwError(() => error);
     if (error.status === 404 && req.context.get(OPTIONAL_SERVER_FEATURE)) return throwError(() => error);
-    const message = error.status === 0 ? 'No se pudo conectar con el backend local.'
+    const message = error.status === 0 ? 'No se pudo conectar con el servidor.'
       : error.status === 401 || !error.status ? 'Inicia sesión para continuar.'
       : error.status === 403 ? 'Tu cuenta no tiene permiso para esta operación.'
       : error.error?.message || 'No se pudo completar la operación. Inténtalo de nuevo.';

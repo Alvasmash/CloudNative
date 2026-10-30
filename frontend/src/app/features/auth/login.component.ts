@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 @Component({
  selector: 'app-login', standalone: true, imports: [RouterModule, FormsModule],
  template: `
@@ -13,7 +14,7 @@ import { HttpErrorResponse } from '@angular/common/http';
    <div class="food-art"><img src="images/product-1.jpg" alt="Pizza artesanal recién preparada" /><span class="photo-caption">Buenos ingredientes. Grandes momentos.</span></div>
    <div class="steps">01 &nbsp; Elige tu favorito &nbsp; · &nbsp; 02 &nbsp; Haz tu pedido &nbsp; · &nbsp; 03 &nbsp; Disfruta</div>
   </div>
-  <div class="access-card"><span class="local-pill">● &nbsp; Entorno local</span>
+  <div class="access-card"><span class="local-pill">● &nbsp; {{publicSite ? 'Bienvenido' : 'Entorno local'}}</span>
    <h2>Bienvenido a<br>Pedidos<span>360</span></h2><p>Entra con tu cuenta o continúa como invitado.</p>
    <form #emailForm="ngForm" (ngSubmit)="loginWithEmail(emailForm)"><fieldset [disabled]="emailBusy()">
     <label>Correo electrónico<input name="email" type="email" [(ngModel)]="email" required email maxlength="254" autocomplete="username" placeholder="nombre@correo.com"></label>
@@ -40,6 +41,7 @@ import { HttpErrorResponse } from '@angular/common/http';
  `]
 })
 export class LoginComponent {
+ readonly publicSite=environment.useHashRouting;
  readonly authService = inject(AuthService);
  private readonly router = inject(Router);
  private readonly route = inject(ActivatedRoute);

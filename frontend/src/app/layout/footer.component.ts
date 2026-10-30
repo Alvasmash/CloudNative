@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-footer',
@@ -21,7 +22,7 @@ import { CommonModule } from '@angular/common';
         <div class="footer-meta">
           <div class="architecture-pill">
             <span class="status-dot"></span>
-            Solo localhost &bull; Datos guardados en este equipo
+            {{ publicSite ? 'Buenos sabores, donde estés' : 'Solo localhost · Datos guardados en este equipo' }}
           </div>
           <p class="copyright">
             &copy; {{ currentYear }} Pedidos360 &bull; Duoc UC &bull; Hecho para disfrutar
@@ -113,5 +114,6 @@ import { CommonModule } from '@angular/common';
   ],
 })
 export class FooterComponent {
+  readonly publicSite = environment.useHashRouting;
   readonly currentYear = new Date().getFullYear();
 }
