@@ -28,10 +28,10 @@ import { OrderStatusPipe } from '../pipes/order-status.pipe';
         align-items: center;
         gap: 6px;
         padding: 4px 12px;
-        border-radius: 9999px;
+        border-radius:9999px;
         font-size: 0.8125rem;
         font-weight: 600;
-        border: 1px solid transparent;
+        border:1px solid transparent;
         letter-spacing: 0.01em;
         white-space: nowrap;
         transition: all 0.2s ease;
@@ -39,7 +39,7 @@ import { OrderStatusPipe } from '../pipes/order-status.pipe';
       .dot {
         width: 7px;
         height: 7px;
-        border-radius: 50%;
+        border-radius:50%;
         display: inline-block;
         box-shadow: 0 0 6px currentColor;
       }

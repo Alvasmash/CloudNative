@@ -3,6 +3,8 @@ import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
 import { RedirectComponent } from './redirect.component';
 export const routes: Routes = [
+  {path: 'recuperar-clave', loadComponent: () => import('./features/auth/password-recovery.component').then(m => m.PasswordRecoveryComponent), title: 'Recuperar contraseña | Pedidos360'},
+  {path: 'restablecer-clave', loadComponent: () => import('./features/auth/password-recovery.component').then(m => m.PasswordRecoveryComponent), data: {reset: true}, title: 'Nueva contraseña | Pedidos360'},
   {path: 'registro', loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent), title: 'Crear cuenta | Pedidos360'},
   {path: 'verificar-correo', loadComponent: () => import('./features/auth/verify-email.component').then(m => m.VerifyEmailComponent), title: 'Verificar correo | Pedidos360'},
   {path: 'admin/productos', loadComponent: () => import('./features/admin/admin-products.component').then(m => m.AdminProductsComponent), canActivate: [adminGuard], title: 'Productos | Administración'},

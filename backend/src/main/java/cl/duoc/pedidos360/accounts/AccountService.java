@@ -19,6 +19,8 @@ import org.springframework.web.server.ResponseStatusException;
 public class AccountService {
     private final AccountRepository accounts;
     private final CustomerSessions sessions;
+    private final CustomerSessionRepository sessionRepository;
+    private final org.springframework.core.task.AsyncTaskExecutor recoveryExecutor;
     private final JavaMailSender mail;
     private final AdminEmailPolicy policy;
     private final BCryptPasswordEncoder passwords = new BCryptPasswordEncoder(12);
@@ -26,10 +28,13 @@ public class AccountService {
     private final FrontendLinks frontendLinks;
     private final String sender;
 
-    public AccountService(AccountRepository accounts, CustomerSessions sessions, JavaMailSender mail,
+    public AccountService(AccountRepository accounts, CustomerSessions sessions, CustomerSessionRepository sessionRepository, JavaMailSender mail,
             AdminEmailPolicy policy, FrontendLinks frontendLinks,
-            @Value("${app.accounts.mail-from:registro@pedidos360.local}") String sender) {
+            @Value("${app.accounts.mail-from:registro@pedidos360.local}") String sender,
+            @org.springframework.beans.factory.annotation.Qualifier("recoveryExecutor") org.springframework.core.task.AsyncTaskExecutor recoveryExecutor) {
         this.accounts = accounts; this.sessions = sessions; this.mail = mail; this.policy = policy;
+        this.sessionRepository = sessionRepository;
+        this.recoveryExecutor = recoveryExecutor;
         this.frontendLinks = frontendLinks; this.sender = sender;
     }
 
@@ -52,8 +57,7 @@ public class AccountService {
     public void register(String nombre, String email, String password) {
         email = normalize(email);
         if (policy.isReservedEmail(email)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Este correo debe iniciar sesión con Microsoft.");
-        if (password.getBytes(StandardCharsets.UTF_8).length > 72)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La contraseña debe ocupar como máximo 72 bytes.");
+        validatePassword(password);
         Account account = accounts.findByIdentityKey("local:" + email).orElse(null);
         if (account != null) return; // Do not reveal account existence or replace a pending password.
         account = new Account();
@@ -96,7 +100,7 @@ public class AccountService {
 
     @Transactional
     public Map<String, Object> login(String email, String password) {
-        Account account = accounts.findByIdentityKey("local:" + normalize(email)).orElse(null);
+        Account account = accounts.findByIdentityKeyForUpdate("local:" + normalize(email)).orElse(null);
         boolean valid = passwords.matches(password, account == null ? dummyPassword : account.passwordHash);
         if (!valid || account == null) throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Correo o contraseña incorrectos.");
         if (!account.verificado) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Verifica tu correo antes de iniciar sesión.");
@@ -114,6 +118,58 @@ public class AccountService {
         a.nombre = (name == null || name.isBlank() ? a.email : name).substring(0, Math.min(120, (name == null || name.isBlank() ? a.email : name).length()));
         a.verificado = true; a.administrador = admin; a.ultimoAcceso = Instant.now();
         accounts.save(a);
+    }
+
+    @Transactional
+    public void requestPasswordReset(String email) {
+        Account account = accounts.findByIdentityKeyForUpdate("local:" + normalize(email)).orElse(null);
+        if (account == null || !account.verificado || !"CORREO".equals(account.proveedor)) return;
+        String token = CustomerSessions.randomToken();
+        account.resetHash = CustomerSessions.hash(token);
+        account.resetExpires = Instant.now().plusSeconds(30 * 60);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(sender); message.setTo(account.email);
+        message.setSubject("Recupera tu contraseña de Pedidos360");
+        message.setText("Hola " + account.nombre + ",\n\nRecibimos una solicitud para cambiar tu contraseña. Abre este enlace:\n\n"
+            + frontendLinks.passwordReset(token)
+            + "\n\nEl enlace vence en 30 minutos y solo puede utilizarse una vez. Si no lo solicitaste, ignora este mensaje: tu contraseña no ha cambiado.\n\nPedidos360");
+        try { mail.send(message); }
+        catch (MailException unavailable) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "No se pudo enviar el correo. Inténtalo más tarde.");
+        }
+    }
+
+    @Transactional
+    public void resetPassword(String token, String password) {
+        validatePassword(password);
+        Account account = accounts.findByResetHashForUpdate(CustomerSessions.hash(token)).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.BAD_REQUEST, "El enlace no es válido, ha caducado o ya fue utilizado."));
+        if (!account.verificado || !"CORREO".equals(account.proveedor) || account.resetExpires == null || !account.resetExpires.isAfter(Instant.now()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El enlace no es válido, ha caducado o ya fue utilizado.");
+        account.passwordHash = passwords.encode(password);
+        account.resetHash = null; account.resetExpires = null;
+        sessionRepository.deleteByAccount_Id(account.id);
+        SimpleMailMessage notice = new SimpleMailMessage();
+        notice.setFrom(sender); notice.setTo(account.email); notice.setSubject("Tu contraseña de Pedidos360 cambió");
+        notice.setText("Hola " + account.nombre + ",\n\nTu contraseña se ha actualizado y tus sesiones anteriores se han cerrado.\n"
+            + "Si no hiciste este cambio, solicita una nueva recuperación de contraseña cuanto antes.\n\nPedidos360");
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override public void afterCommit() {
+                    try { recoveryExecutor.execute(() -> {
+                        try { mail.send(notice); }
+                        catch (MailException failed) { org.slf4j.LoggerFactory.getLogger(AccountService.class).warn("No se pudo enviar una notificación de cambio de contraseña."); }
+                    }); }
+                    catch (org.springframework.core.task.TaskRejectedException full) {
+                        org.slf4j.LoggerFactory.getLogger(AccountService.class).warn("La notificación de cambio de contraseña quedó sin enviar; cola ocupada.");
+                    }
+                }
+            });
+    }
+
+    private void validatePassword(String password) {
+        if (password == null || password.length() < 12 || password.getBytes(StandardCharsets.UTF_8).length > 72)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usa al menos 12 caracteres y como máximo 72 bytes para la contraseña.");
     }
 
     private String normalize(String email) { return email.trim().toLowerCase(Locale.ROOT); }

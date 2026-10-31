@@ -19,4 +19,6 @@ public class Account {
     @JsonIgnore public String passwordHash;
     @JsonIgnore public String verificationHash;
     @JsonIgnore public Instant verificationExpires;
+    @JsonIgnore @Column(length = 64) public String resetHash;
+    @JsonIgnore public Instant resetExpires;
 }

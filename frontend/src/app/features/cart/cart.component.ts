@@ -271,7 +271,7 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
   `,
   styles: [
     `
-      .guest-checkout-note { font-size: 12px; line-height: 1.7; color: #53617c; margin-bottom: 18px; }
+      .guest-checkout-note { font-size: 12px; line-height: 1.7; color:#d6a2bf; margin-bottom: 18px; }
       .cart-page {
         max-width: 1280px;
         margin: 0 auto;
@@ -283,19 +283,19 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .page-title {
         font-size: 2rem;
         font-weight: 800;
-        color: #17243d;
+        color:#f5c5df;
         margin: 0 0 6px 0;
         letter-spacing: -0.02em;
       }
       .page-subtitle {
         font-size: 0.95rem;
-        color: #596982;
+        color:#d6a2bf;
         margin: 0;
       }
       .empty-cart-card {
-        background: #ffffff;
-        border: 1px solid #dce4f1;
-        border-radius: 20px;
+        background:#17131b;
+        border:1px solid #4a2a40;
+        border-radius:20px;
         padding: 64px 24px;
         text-align: center;
         max-width: 520px;
@@ -305,9 +305,9 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .empty-icon-wrapper {
         width: 84px;
         height: 84px;
-        border-radius: 50%;
-        background: #fff7ed;
-        color: var(--primary);
+        border-radius:50%;
+        background:#30220f;
+        color:var(--primary);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -315,11 +315,11 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       }
       .empty-cart-card h2 {
         font-size: 1.5rem;
-        color: #17243d;
+        color:#f5c5df;
         margin: 0 0 8px 0;
       }
       .empty-cart-card p {
-        color: #596982;
+        color:#d6a2bf;
         margin: 0 0 24px 0;
       }
       .cart-layout {
@@ -330,9 +330,9 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       }
       .items-card,
       .summary-card {
-        background: #ffffff;
-        border: 1px solid #dce4f1;
-        border-radius: 16px;
+        background:#17131b;
+        border:1px solid #4a2a40;
+        border-radius:16px;
         padding: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       }
@@ -341,26 +341,26 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         justify-content: space-between;
         align-items: center;
         padding-bottom: 16px;
-        border-bottom: 1px solid #e8edf6;
+        border-bottom:1px solid #4a2a40;
       }
       .items-count {
         font-weight: 700;
-        color: #33496d;
+        color:#f5c5df;
         font-size: 0.95rem;
       }
       .btn-clear-cart {
-        background: none;
-        border: none;
-        color: #ef4444;
+        background:none;
+        border:none;
+        color:#fda4af;
         font-size: 0.8125rem;
         font-weight: 600;
         cursor: pointer;
         padding: 4px 8px;
-        border-radius: 6px;
+        border-radius:6px;
         transition: background 0.15s;
       }
       .btn-clear-cart:hover {
-        background: #fef2f2;
+        background:#2d101b;
       }
       .items-list {
         display: flex;
@@ -371,15 +371,15 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         align-items: center;
         gap: 16px;
         padding: 20px 0;
-        border-bottom: 1px solid #e8edf6;
+        border-bottom:1px solid #4a2a40;
       }
       .item-thumb {
         width: 72px;
         height: 72px;
-        border-radius: 12px;
+        border-radius:12px;
         object-fit: cover;
         flex-shrink: 0;
-        background: #e8edf6;
+        background:#17131b;
       }
       .item-details {
         flex: 1;
@@ -390,26 +390,26 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .item-name {
         font-size: 1rem;
         font-weight: 700;
-        color: #17243d;
+        color:#f5c5df;
         margin: 0;
       }
       .item-category {
         font-size: 0.75rem;
-        color: #596982;
+        color:#d6a2bf;
         text-transform: uppercase;
         letter-spacing: 0.04em;
       }
       .item-unit-price {
         font-size: 0.85rem;
-        color: #5c6d87;
+        color:#d6a2bf;
       }
       .qty-control {
         display: flex;
         align-items: center;
-        border: 1px solid #dce4f1;
-        border-radius: 10px;
+        border:1px solid #4a2a40;
+        border-radius:10px;
         padding: 2px;
-        background: #f4f7fc;
+        background:#17131b;
       }
       .qty-btn {
         width: 32px;
@@ -417,18 +417,18 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         display: flex;
         align-items: center;
         justify-content: center;
-        border: none;
-        background: #ffffff;
-        border-radius: 8px;
+        border:none;
+        background:#17131b;
+        border-radius:8px;
         cursor: pointer;
         font-weight: 700;
-        color: #33496d;
+        color:#f5c5df;
         transition: all 0.15s;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       }
       .qty-btn:hover:not(:disabled) {
-        background: #e8edf6;
-        color: var(--primary);
+        background:#17131b;
+        color:var(--primary);
       }
       .qty-btn:disabled {
         opacity: 0.4;
@@ -439,7 +439,7 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         text-align: center;
         font-weight: 700;
         font-size: 0.9rem;
-        color: #17243d;
+        color:#f5c5df;
       }
       .item-subtotal-group {
         display: flex;
@@ -451,26 +451,26 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .item-subtotal {
         font-size: 1.1rem;
         font-weight: 800;
-        color: #17243d;
+        color:#f5c5df;
       }
       .btn-remove {
-        background: none;
-        border: none;
-        color: #5c6d87;
+        background:none;
+        border:none;
+        color:#d6a2bf;
         cursor: pointer;
         padding: 6px;
-        border-radius: 8px;
+        border-radius:8px;
         transition: all 0.15s;
       }
       .btn-remove:hover {
-        color: #ef4444;
-        background: #fef2f2;
+        color:#fda4af;
+        background:#2d101b;
       }
       .continue-shopping {
         padding-top: 20px;
       }
       .link-continue {
-        color: var(--primary);
+        color:var(--primary);
         text-decoration: none;
         font-weight: 600;
         font-size: 0.9rem;
@@ -484,7 +484,7 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .summary-title {
         font-size: 1.25rem;
         font-weight: 800;
-        color: #17243d;
+        color:#f5c5df;
         margin: 0 0 20px 0;
       }
       .summary-rows {
@@ -496,20 +496,20 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .summary-row {
         display: flex;
         justify-content: space-between;
-        color: #596982;
+        color:#d6a2bf;
         font-size: 0.925rem;
       }
       .text-success {
-        color: #10b981;
+        color:#86efac;
         font-weight: 700;
       }
       .summary-divider {
         height: 1px;
-        background: #dce4f1;
+        background:#17131b;
         margin: 6px 0;
       }
       .total-row {
-        color: #17243d;
+        color:#f5c5df;
         font-size: 1.1rem;
         font-weight: 700;
         align-items: baseline;
@@ -517,16 +517,16 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .total-amount {
         font-size: 1.6rem;
         font-weight: 900;
-        color: var(--primary);
+        color:var(--primary);
       }
       .checkout-form {
-        border-top: 1px solid #e8edf6;
+        border-top:1px solid #4a2a40;
         padding-top: 20px;
       }
       .form-section-title {
         font-size: 0.95rem;
         font-weight: 700;
-        color: #33496d;
+        color:#f5c5df;
         margin: 0 0 16px 0;
       }
       .form-group {
@@ -538,23 +538,23 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .form-group label {
         font-size: 0.8125rem;
         font-weight: 600;
-        color: #394356;
+        color:#f5c5df;
       }
       .form-input {
         padding: 10px 14px;
-        border: 1px solid #cbd7e9;
-        border-radius: 10px;
+        border:1px solid #4a2a40;
+        border-radius:10px;
         font-size: 0.875rem;
         transition: all 0.2s;
       }
       .form-input:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        outline:none;
+        border-color:var(--primary);
+        box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.15);
       }
       .hint {
         font-size: 0.725rem;
-        color: #5c6d87;
+        color:#d6a2bf;
       }
       .btn {
         display: inline-flex;
@@ -562,34 +562,32 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
         justify-content: center;
         gap: 8px;
         padding: 12px 24px;
-        border-radius: 10px;
+        border-radius:10px;
         font-weight: 600;
         cursor: pointer;
         text-decoration: none;
         transition: all 0.2s;
-        border: none;
+        border:none;
       }
       .btn-primary {
-        background: var(--primary);
-        color: #ffffff;
+        background:var(--primary);color:var(--on-primary);
       }
       .btn-primary:hover {
-        background: #1e40af;
-      }
+        background:var(--primary-hover);
+      ;color:var(--on-primary);}
       .btn-checkout {
         width: 100%;
-        background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
-        color: #ffffff;
+        background:linear-gradient(135deg, var(--primary) 0%, #140c16 100%);color:var(--on-primary);
         font-size: 1rem;
         font-weight: 700;
         padding: 14px;
-        border-radius: 12px;
-        box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+        border-radius:12px;
+        box-shadow: 0 10px 20px -5px rgba(244, 114, 182, 0.4);
         margin-top: 12px;
       }
       .btn-checkout:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 14px 24px -5px rgba(37, 99, 235, 0.5);
+        box-shadow: 0 14px 24px -5px rgba(244, 114, 182, 0.5);
       }
       .btn-checkout:disabled {
         opacity: 0.6;
@@ -600,9 +598,9 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal.com
       .spinner {
         width: 18px;
         height: 18px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-top-color: #ffffff;
-        border-radius: 50%;
+        border:2px solid rgba(255, 255, 255, 0.3);
+        border-top-color:#4a2a40;
+        border-radius:50%;
         animation: spin 0.8s linear infinite;
       }
       @keyframes spin {

@@ -10,7 +10,7 @@ La entrega incluye `backend.jar`, `backend.sha256` e `instalar-aws.sh`. Colocalo
 bash instalar-aws.sh
 ```
 
-Pide el Gmail remitente y la clave de aplicacion de 16 caracteres, oculta. Es la misma configuracion usada en local. No pegues la clave en comandos, capturas o chats.
+Si AWS ya tiene `/etc/pedidos360-public.env`, conserva Gmail sin pedir nuevamente la clave. En una primera instalacion pide el Gmail remitente y la clave de aplicacion de 16 caracteres, oculta. No pegues la clave en comandos, capturas o chats.
 
 El instalador crea `/etc/pedidos360-public.env` con permisos 600 y un archivo adicional de systemd. Conserva `/etc/pedidos360.env` y `/etc/pedidos360-kafka.env`, que contienen la conexion PostgreSQL y los brokers ya configurados. No reemplaza la base de datos por H2. El servicio sigue usando su configuracion original y el archivo nuevo solo agrega correo, URL de Pages y CORS.
 
@@ -26,6 +26,12 @@ curl -fsS https://jfbxfcaajg.execute-api.us-east-1.amazonaws.com/public/auth/mai
 ```
 
 La segunda respuesta debe indicar `SMTP`. Comprobar tambien que un usuario anonimo obtiene 401 en `/api/admin/productos` y `/api/admin/usuarios`. Las cuentas por correo usan sesiones bearer del backend; API Gateway debe dejar que Spring valide Authorization y no imponer un autorizador que solo acepte JWT Microsoft.
+
+La entrega con recuperacion de contrasena tambien debe indicar `passwordResetAvailable: true`. El enlace del correo usa `#/restablecer-clave?token=...`; caduca en 30 minutos y solo se puede utilizar una vez. Un nuevo correo invalida el enlace anterior. Al confirmar, se cambia la clave con BCrypt y se revocan todas las sesiones de esa cuenta. La notificacion de cambio se envia despues de confirmar la transaccion, sin incluir la contrasena.
+
+El formulario responde de forma generica y procesa la busqueda y el envio en una cola limitada para no revelar si el correo existe por la respuesta o la espera del SMTP. Solo recupera cuentas verificadas por correo; los usuarios Microsoft conservan el proceso de Microsoft. Las solicitudes tienen limites por correo y direccion de origen.
+
+Referencia de seguridad: [OWASP Forgot Password Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html).
 
 ## Interfaz
 

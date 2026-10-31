@@ -29,8 +29,8 @@ import { ToastContainerComponent } from './shared/components/toast-container.com
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        background-color: #f4f7fc;
-        color: #17243d;
+        background-color:var(--bg-main);
+        color:#f5c5df;
       }
       .app-main {
         flex: 1;

@@ -14,21 +14,53 @@ import org.springframework.web.server.ResponseStatusException;
 public class AccountController {
     private final AccountService accounts;
     private final CustomerSessions sessions;
+    private final org.springframework.core.task.AsyncTaskExecutor recoveryExecutor;
     private final Map<String, Bucket> limits = new HashMap<>();
     private record Bucket(int count, Instant expires) {}
     @org.springframework.beans.factory.annotation.Value("${spring.mail.host:localhost}")
     private String smtpHost;
-    public AccountController(AccountService accounts, CustomerSessions sessions) { this.accounts = accounts; this.sessions = sessions; }
+    public AccountController(AccountService accounts, CustomerSessions sessions,
+            @org.springframework.beans.factory.annotation.Qualifier("recoveryExecutor") org.springframework.core.task.AsyncTaskExecutor recoveryExecutor) {
+        this.accounts = accounts; this.sessions = sessions; this.recoveryExecutor = recoveryExecutor;
+    }
 
     public record Register(@NotBlank @Size(max = 120) String nombre, @NotBlank @Email @Size(max = 254) String email,
             @NotBlank @Size(min = 12, max = 72) String password) {}
     public record Login(@NotBlank @Email @Size(max = 254) String email, @NotBlank @Size(max = 72) String password) {}
     public record EmailAddress(@NotBlank @Email @Size(max = 254) String email) {}
     public record Verification(@NotBlank @Pattern(regexp = "[A-Za-z0-9_-]{43}") String token) {}
+    public record PasswordReset(@NotBlank @Pattern(regexp = "[A-Za-z0-9_-]{43}") String token,
+            @NotBlank @Size(min = 12, max = 72) String password) {}
 
     @GetMapping("/public/auth/mail-mode")
-    public Map<String, String> mailMode() {
-        return Map.of("mode", Set.of("localhost", "127.0.0.1", "mailpit").contains(smtpHost) ? "LOCAL" : "SMTP");
+    public Map<String, Object> mailMode() {
+        return Map.of("mode", Set.of("localhost", "127.0.0.1", "mailpit").contains(smtpHost) ? "LOCAL" : "SMTP", "passwordResetAvailable", true);
+    }
+
+    @PostMapping("/public/auth/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody EmailAddress body, HttpServletRequest request) {
+        limit("reset-request:" + request.getRemoteAddr(), 20);
+        limit("reset-email:" + body.email().trim().toLowerCase(Locale.ROOT), 5);
+        // Run every lookup off the request thread, including unknown and Microsoft-only addresses.
+        try {
+            recoveryExecutor.execute(() -> {
+                try { accounts.requestPasswordReset(body.email()); }
+                catch (Exception failure) {
+                    org.slf4j.LoggerFactory.getLogger(AccountController.class).warn("No se pudo procesar un correo de recuperación; revisa SMTP.");
+                }
+            });
+        } catch (org.springframework.core.task.TaskRejectedException full) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "El servicio está ocupado. Inténtalo más tarde.");
+        }
+        return ResponseEntity.accepted().cacheControl(CacheControl.noStore()).body(Map.of("message",
+            "Si existe una cuenta verificada con ese correo, recibirás un enlace para recuperar tu contraseña. Revisa también spam."));
+    }
+
+    @PostMapping("/public/auth/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordReset body, HttpServletRequest request) {
+        limit("reset-attempt:" + request.getRemoteAddr(), 30);
+        accounts.resetPassword(body.token(), body.password());
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("message", "Contraseña actualizada. Inicia sesión de nuevo con tu nueva contraseña."));
     }
 
     @PostMapping("/public/auth/register")

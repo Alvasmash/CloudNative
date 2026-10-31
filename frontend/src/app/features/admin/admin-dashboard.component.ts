@@ -324,25 +324,25 @@ import { AdminNavComponent } from './admin-nav.component';
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: rgba(245, 158, 11, 0.15);
-        border: 1px solid rgba(245, 158, 11, 0.3);
-        color: #d97706;
+        background:rgba(245, 158, 11, 0.15);
+        border:1px solid rgba(245, 158, 11, 0.3);
+        color:#fcd98b;
         font-size: 0.775rem;
         font-weight: 700;
         padding: 4px 10px;
-        border-radius: 6px;
+        border-radius:6px;
         margin-bottom: 8px;
       }
       .admin-title {
         font-size: 2.15rem;
         font-weight: 800;
-        color: #17243d;
+        color:#f5c5df;
         margin: 0 0 6px 0;
         letter-spacing: -0.025em;
       }
       .admin-subtitle {
         font-size: 0.95rem;
-        color: #596982;
+        color:#d6a2bf;
         margin: 0;
       }
       .btn-refresh {
@@ -350,18 +350,18 @@ import { AdminNavComponent } from './admin-nav.component';
         align-items: center;
         gap: 8px;
         padding: 10px 18px;
-        border-radius: 10px;
-        background: #ffffff;
-        border: 1px solid #cbd7e9;
-        color: #394356;
+        border-radius:10px;
+        background:#17131b;
+        border:1px solid #4a2a40;
+        color:#f5c5df;
         font-weight: 600;
         font-size: 0.875rem;
         cursor: pointer;
         transition: all 0.2s;
       }
       .btn-refresh:hover:not(:disabled) {
-        background: #f4f7fc;
-        border-color: #5c6d87;
+        background:#17131b;
+        border-color:#4a2a40;
       }
       .spinning {
         animation: spin 1s linear infinite;
@@ -378,9 +378,9 @@ import { AdminNavComponent } from './admin-nav.component';
         margin-bottom: 32px;
       }
       .kpi-card {
-        background: #ffffff;
-        border: 1px solid #dce4f1;
-        border-radius: 16px;
+        background:#17131b;
+        border:1px solid #4a2a40;
+        border-radius:16px;
         padding: 20px;
         display: flex;
         align-items: center;
@@ -395,23 +395,23 @@ import { AdminNavComponent } from './admin-nav.component';
         font-size: 2.2rem;
         width: 56px;
         height: 56px;
-        border-radius: 14px;
+        border-radius:14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f4f7fc;
+        background:#17131b;
       }
       .highlight-revenue .kpi-icon {
-        background: #ecfdf5;
+        background:#12251d;
       }
       .highlight-orders .kpi-icon {
-        background: #eff6ff;
+        background:#17131b;
       }
       .highlight-pending .kpi-icon {
-        background: #fef3c7;
+        background:#30220f;
       }
       .highlight-prep .kpi-icon {
-        background: #ede9fe;
+        background:#17131b;
       }
       .kpi-info {
         display: flex;
@@ -419,7 +419,7 @@ import { AdminNavComponent } from './admin-nav.component';
       }
       .kpi-label {
         font-size: 0.75rem;
-        color: #596982;
+        color:#d6a2bf;
         text-transform: uppercase;
         font-weight: 600;
         letter-spacing: 0.04em;
@@ -427,17 +427,17 @@ import { AdminNavComponent } from './admin-nav.component';
       .kpi-val {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #17243d;
+        color:#f5c5df;
         line-height: 1.2;
       }
       .kpi-sub {
         font-size: 0.725rem;
-        color: #5c6d87;
+        color:#d6a2bf;
       }
       .admin-table-container {
-        background: #ffffff;
-        border: 1px solid #dce4f1;
-        border-radius: 16px;
+        background:#17131b;
+        border:1px solid #4a2a40;
+        border-radius:16px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         overflow: hidden;
       }
@@ -446,10 +446,10 @@ import { AdminNavComponent } from './admin-nav.component';
         justify-content: space-between;
         align-items: center;
         padding: 16px 20px;
-        border-bottom: 1px solid #e8edf6;
+        border-bottom:1px solid #4a2a40;
         flex-wrap: wrap;
         gap: 14px;
-        background: #f4f7fc;
+        background:#17131b;
       }
       .search-box {
         position: relative;
@@ -461,20 +461,20 @@ import { AdminNavComponent } from './admin-nav.component';
       .search-box svg {
         position: absolute;
         left: 12px;
-        color: #5c6d87;
+        color:#d6a2bf;
         pointer-events: none;
       }
       .search-input {
         width: 100%;
         padding: 8px 12px 8px 36px;
-        border-radius: 8px;
-        border: 1px solid #cbd7e9;
+        border-radius:8px;
+        border:1px solid #4a2a40;
         font-size: 0.875rem;
-        background: #ffffff;
+        background:#17131b;
       }
       .search-input:focus {
-        outline: none;
-        border-color: var(--primary);
+        outline:none;
+        border-color:var(--primary);
       }
       .filter-group {
         display: flex;
@@ -484,46 +484,46 @@ import { AdminNavComponent } from './admin-nav.component';
       .filter-label {
         font-size: 0.8125rem;
         font-weight: 600;
-        color: #505d78;
+        color:#f5c5df;
       }
       .filter-select {
         padding: 8px 12px;
-        border-radius: 8px;
-        border: 1px solid #cbd7e9;
-        background: #ffffff;
+        border-radius:8px;
+        border:1px solid #4a2a40;
+        background:#17131b;
         font-size: 0.875rem;
-        color: #33496d;
+        color:#f5c5df;
       }
       .table-responsive {
         overflow-x: auto;
       }
       .admin-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse:collapse;
         font-size: 0.875rem;
         text-align: left;
       }
       .admin-table th {
         padding: 14px 18px;
-        background: #ffffff;
-        color: #596982;
+        background:#17131b;
+        color:#d6a2bf;
         font-weight: 600;
         font-size: 0.775rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        border-bottom: 2px solid #e8edf6;
+        border-bottom:2px solid #4a2a40;
       }
       .admin-table td {
         padding: 14px 18px;
-        border-bottom: 1px solid #e8edf6;
-        color: #394356;
+        border-bottom:1px solid #4a2a40;
+        color:#f5c5df;
         vertical-align: middle;
       }
       .admin-table tr:hover {
-        background: #f4f7fc;
+        background:#17131b;
       }
       .order-code-link {
-        color: #2563eb;
+        color:#d6a2bf;
         font-weight: 700;
         text-decoration: none;
       }
@@ -532,35 +532,35 @@ import { AdminNavComponent } from './admin-nav.component';
       }
       .customer-name {
         display: block;
-        color: #17243d;
+        color:#f5c5df;
       }
       .customer-email {
         font-size: 0.8rem;
-        color: #596982;
+        color:#d6a2bf;
       }
       .date-cell {
         font-size: 0.8rem;
-        color: #596982;
+        color:#d6a2bf;
         white-space: nowrap;
       }
       .total-cell {
         font-weight: 800;
-        color: #17243d;
+        color:#f5c5df;
         font-size: 0.95rem;
       }
       .status-changer-select {
         padding: 6px 10px;
-        border-radius: 8px;
-        border: 1px solid #cbd7e9;
+        border-radius:8px;
+        border:1px solid #4a2a40;
         font-size: 0.8125rem;
-        background: #ffffff;
-        color: #33496d;
+        background:#17131b;
+        color:#f5c5df;
         cursor: pointer;
         font-weight: 500;
       }
       .status-changer-select:focus {
-        outline: none;
-        border-color: var(--primary);
+        outline:none;
+        border-color:var(--primary);
       }
       .actions-cell {
         display: flex;
@@ -571,27 +571,27 @@ import { AdminNavComponent } from './admin-nav.component';
       .btn-action {
         width: 32px;
         height: 32px;
-        border-radius: 8px;
+        border-radius:8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border: none;
+        border:none;
         cursor: pointer;
         transition: all 0.15s;
       }
       .btn-view {
-        background: #eff6ff;
-        color: #2563eb;
+        background:#17131b;
+        color:#d6a2bf;
       }
       .btn-view:hover {
-        background: #dbeafe;
+        background:#17131b;
       }
       .btn-delete {
-        background: #fef2f2;
-        color: #dc2626;
+        background:#2d101b;
+        color:#fda4af;
       }
       .btn-delete:hover {
-        background: #fee2e2;
+        background:#2d101b;
       }
       .text-center {
         text-align: center;
@@ -603,14 +603,14 @@ import { AdminNavComponent } from './admin-nav.component';
       .empty-table {
         text-align: center;
         padding: 48px 20px;
-        color: #596982;
+        color:#d6a2bf;
       }
       .spinner {
         width: 32px;
         height: 32px;
-        border: 3px solid #dce4f1;
-        border-top-color: var(--primary);
-        border-radius: 50%;
+        border:3px solid #4a2a40;
+        border-top-color:var(--primary);
+        border-radius:50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 12px;
       }

@@ -174,14 +174,14 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        color: #596982;
+        color:#d6a2bf;
         text-decoration: none;
         font-weight: 600;
         font-size: 0.9rem;
         transition: color 0.15s;
       }
       .btn-back:hover {
-        color: #17243d;
+        color:#f5c5df;
       }
       .detail-container {
         display: flex;
@@ -189,10 +189,10 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         gap: 24px;
       }
       .summary-banner {
-        background: linear-gradient(135deg, #17243d 0%, #33496d 100%);
-        border-radius: 20px;
+        background:linear-gradient(135deg, #140c16 0%, #140c16 100%);
+        border-radius:20px;
         padding: 36px 32px;
-        color: #ffffff;
+        color:#fff1f8;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -208,7 +208,7 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       .banner-tag {
         font-size: 0.75rem;
         font-weight: 700;
-        color: #4b5770;
+        color:#f5c5df;
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
@@ -220,20 +220,20 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .order-timestamp {
         font-size: 0.875rem;
-        color: #5c6d87;
+        color:#d6a2bf;
       }
       .timeline-card,
       .card {
-        background: #ffffff;
-        border: 1px solid #dce4f1;
-        border-radius: 16px;
+        background:#17131b;
+        border:1px solid #4a2a40;
+        border-radius:16px;
         padding: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       }
       .card-section-title {
         font-size: 1.1rem;
         font-weight: 800;
-        color: #17243d;
+        color:#f5c5df;
         margin: 0 0 20px 0;
       }
       .detail-grid {
@@ -247,35 +247,35 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .items-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse:collapse;
         font-size: 0.9rem;
       }
       .items-table th {
         text-align: left;
-        color: #596982;
+        color:#d6a2bf;
         font-weight: 600;
         font-size: 0.775rem;
         text-transform: uppercase;
         letter-spacing: 0.04em;
         padding-bottom: 12px;
-        border-bottom: 2px solid #e8edf6;
+        border-bottom:2px solid #4a2a40;
       }
       .items-table td {
         padding: 14px 0;
-        border-bottom: 1px solid #e8edf6;
-        color: #394356;
+        border-bottom:1px solid #4a2a40;
+        color:#f5c5df;
       }
       .item-product-name {
         display: block;
-        color: #17243d;
+        color:#f5c5df;
       }
       .item-ref {
-        color: #5c6d87;
+        color:#d6a2bf;
         font-size: 0.75rem;
       }
       .item-subtotal-cell {
         font-weight: 700;
-        color: #17243d;
+        color:#f5c5df;
       }
       .text-center {
         text-align: center;
@@ -285,14 +285,14 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .foot-label {
         font-weight: 700;
-        color: #17243d;
+        color:#f5c5df;
         font-size: 1rem;
         padding-top: 16px;
       }
       .foot-total {
         font-weight: 900;
         font-size: 1.4rem;
-        color: var(--primary);
+        color:var(--primary);
         padding-top: 16px;
       }
       .info-list {
@@ -307,28 +307,28 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
       }
       .info-label {
         font-size: 0.75rem;
-        color: #5c6d87;
+        color:#d6a2bf;
         text-transform: uppercase;
         font-weight: 600;
       }
       .info-val {
         font-size: 0.95rem;
-        color: #17243d;
+        color:#f5c5df;
       }
       .loading-box,
       .not-found-card {
         text-align: center;
         padding: 64px 24px;
-        background: #ffffff;
-        border: 1px solid #dce4f1;
-        border-radius: 16px;
+        background:#17131b;
+        border:1px solid #4a2a40;
+        border-radius:16px;
       }
       .spinner {
         width: 36px;
         height: 36px;
-        border: 3px solid #dce4f1;
-        border-top-color: var(--primary);
-        border-radius: 50%;
+        border:3px solid #4a2a40;
+        border-top-color:var(--primary);
+        border-radius:50%;
         animation: spin 0.8s linear infinite;
         margin: 0 auto 16px;
       }
@@ -342,15 +342,14 @@ import { ClpCurrencyPipe } from '../../shared/pipes/clp-currency.pipe';
         align-items: center;
         gap: 8px;
         padding: 10px 20px;
-        border-radius: 10px;
+        border-radius:10px;
         font-weight: 600;
         text-decoration: none;
-        border: none;
+        border:none;
         cursor: pointer;
       }
       .btn-primary {
-        background: var(--primary);
-        color: #ffffff;
+        background:var(--primary);color:var(--on-primary);
       }
       @media (max-width: 800px) {
         .detail-grid {

@@ -136,4 +136,10 @@ export class AuthService {
     sessionStorage.setItem('pedidos360_customer_session', JSON.stringify({token: this.token, expiresAt: this.expiresAt}));
     this.currentUser.set({name: result.name, email: result.email, username: result.username, isAdmin: false, roles: ['USER']});
   }
+
+  clearEmailSession(): void {
+    if (!this.emailSession) return;
+    sessionStorage.removeItem('pedidos360_customer_session');
+    this.currentUser.set(null); this.token = ''; this.expiresAt = 0; this.emailSession = false;
+  }
 }

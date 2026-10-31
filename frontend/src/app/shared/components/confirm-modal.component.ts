@@ -59,7 +59,7 @@ import { CommonModule } from '@angular/common';
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(11, 19, 37, 0.65);
+        background:rgba(11, 19, 37, 0.65);
         backdrop-filter: blur(4px);
         z-index: 9998;
         display: flex;
@@ -77,8 +77,8 @@ import { CommonModule } from '@angular/common';
         }
       }
       .modal-dialog {
-        background: #ffffff;
-        border-radius: 16px;
+        background:#17131b;
+        border-radius:16px;
         max-width: 460px;
         width: 100%;
         padding: 24px;
@@ -106,33 +106,33 @@ import { CommonModule } from '@angular/common';
       .modal-icon {
         width: 44px;
         height: 44px;
-        border-radius: 12px;
+        border-radius:12px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
       }
       .icon-danger {
-        background: #fee2e2;
-        color: #dc2626;
+        background:#2d101b;
+        color:#fda4af;
       }
       .icon-warning {
-        background: #fef3c7;
-        color: #d97706;
+        background:#30220f;
+        color:#fcd98b;
       }
       .icon-primary {
-        background: #eff6ff;
-        color: #2563eb;
+        background:#17131b;
+        color:#d6a2bf;
       }
       .modal-title {
         font-size: 1.125rem;
         font-weight: 700;
-        color: #17243d;
+        color:#f5c5df;
         margin: 0 0 6px 0;
       }
       .modal-desc {
         font-size: 0.9rem;
-        color: #596982;
+        color:#d6a2bf;
         margin: 0;
         line-height: 1.5;
       }
@@ -143,34 +143,33 @@ import { CommonModule } from '@angular/common';
       }
       .btn {
         padding: 10px 18px;
-        border-radius: 10px;
+        border-radius:10px;
         font-weight: 600;
         font-size: 0.875rem;
         cursor: pointer;
-        border: 1px solid transparent;
+        border:1px solid transparent;
         transition: all 0.15s ease;
       }
       .btn-secondary {
-        background: #e8edf6;
-        color: #505d78;
+        background:#17131b;
+        color:#f5c5df;
       }
       .btn-secondary:hover {
-        background: #dce4f1;
+        background:#17131b;
       }
       .btn-danger {
-        background: #dc2626;
-        color: #ffffff;
+        background:#9f1239;
+        color:#fff1f8;
       }
       .btn-danger:hover {
-        background: #b91c1c;
+        background:#9f1239;
       }
       .btn-primary {
-        background: var(--primary);
-        color: #ffffff;
+        background:var(--primary);color:var(--on-primary);
       }
       .btn-primary:hover {
-        background: #1e40af;
-      }
+        background:var(--primary-hover);
+      ;color:var(--on-primary);}
     `,
   ],
 })

@@ -23,7 +23,15 @@ public class FrontendLinks {
     }
 
     public String verification(String token) {
+        return link("verificar-correo", token);
+    }
+
+    public String passwordReset(String token) {
+        return link("restablecer-clave", token);
+    }
+
+    private String link(String route, String token) {
         if (!token.matches("[A-Za-z0-9_-]{43}")) throw new IllegalArgumentException("Token de verificación no válido");
-        return base + (hashRouting ? "#/" : "") + "verificar-correo?token=" + token;
+        return base + (hashRouting ? "#/" : "") + route + "?token=" + token;
     }
 }

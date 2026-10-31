@@ -4,4 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CustomerSessionRepository extends JpaRepository<CustomerSession, String> {
     long deleteByExpiresAtBefore(java.time.Instant now);
+    long deleteByAccount_Id(String accountId);
 }

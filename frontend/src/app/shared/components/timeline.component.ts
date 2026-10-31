@@ -115,9 +115,9 @@ interface Step {
       .node-circle {
         width: 36px;
         height: 36px;
-        border-radius: 50%;
-        background: #dce4f1;
-        color: #596982;
+        border-radius:50%;
+        background:#17131b;
+        color:#d6a2bf;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -134,22 +134,21 @@ interface Step {
         left: 50%;
         width: 100%;
         height: 3px;
-        background: #dce4f1;
+        background:#17131b;
         z-index: 1;
         transform: translateY(-50%);
         transition: background 0.3s ease;
       }
       .node-line.filled {
-        background: #10b981;
+        background:#12251d;
       }
       .step-item.completed .node-circle {
-        background: #10b981;
-        color: #ffffff;
+        background:#12251d;
+        color:#fff1f8;
       }
       .step-item.active .node-circle {
-        background: var(--primary);
-        color: #ffffff;
-        box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.25);
+        background:var(--primary);color:var(--on-primary);
+        box-shadow: 0 0 0 5px rgba(244, 114, 182, 0.25);
         animation: pulse 2s infinite;
       }
       @keyframes pulse {
@@ -165,38 +164,38 @@ interface Step {
         display: block;
         font-weight: 700;
         font-size: 0.875rem;
-        color: #33496d;
+        color:#f5c5df;
         margin-bottom: 2px;
       }
       .step-item.active .step-title {
-        color: var(--primary);
+        color:var(--primary);
       }
       .step-desc {
         display: block;
         font-size: 0.75rem;
-        color: #596982;
+        color:#d6a2bf;
       }
       .cancelled-banner {
         display: flex;
         align-items: center;
         gap: 16px;
-        background: #fef2f2;
-        border: 1px solid #fca5a5;
-        border-radius: 12px;
+        background:#2d101b;
+        border:1px solid #763244;
+        border-radius:12px;
         padding: 16px 20px;
       }
       .cancelled-icon {
-        color: #dc2626;
+        color:#fda4af;
         flex-shrink: 0;
       }
       .cancelled-title {
-        color: #991b1b;
+        color:#fda4af;
         font-size: 1rem;
         font-weight: 700;
         margin: 0 0 4px 0;
       }
       .cancelled-desc {
-        color: #7f1d1d;
+        color:#fda4af;
         font-size: 0.875rem;
         margin: 0;
       }

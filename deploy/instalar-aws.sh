@@ -14,6 +14,11 @@ for command in java curl sha256sum python3; do command -v "$command" >/dev/null 
 systemctl show pedidos360 -p ExecStart --value | grep -Fq "$jar" || { echo 'La ruta del servicio es diferente; revisala antes de continuar.'; exit 1; }
 sha256sum --check backend.sha256
 
+reuse_env=false
+if sudo test -s "$envfile"; then
+    reuse_env=true
+    echo 'Se conserva la configuracion de Gmail existente en AWS.'
+else
 read -r -p 'Gmail remitente (la cuenta que ya configuraste en local): ' sender
 [[ "$sender" =~ ^[A-Za-z0-9._%+-]+@gmail\.com$ ]] || { echo 'Direccion Gmail no valida.'; exit 1; }
 while true; do
@@ -23,12 +28,17 @@ while true; do
     [[ "$password" =~ ^[A-Za-z0-9]{16}$ ]] && break
     echo 'Copia solo la clave de 16 caracteres generada por Google.'
 done
+fi
 
 stage=$(mktemp -d "$HOME/pedidos360-release.XXXXXXXX")
 chmod 700 "$stage"
+if $reuse_env; then
+    sudo cat "$envfile" > "$stage/public.env"
+else
 printf 'SMTP_HOST=smtp.gmail.com\nSMTP_PORT=587\nSMTP_USERNAME=%s\nSMTP_PASSWORD=%s\nSMTP_AUTH=true\nSMTP_STARTTLS=true\nMAIL_FROM=%s\nFRONTEND_URL=%s\nFRONTEND_HASH_ROUTING=true\nAPP_SECURITY_ALLOWED_ORIGINS=%s\n' \
     "$sender" "$password" "$sender" "$site" "$origin" > "$stage/public.env"
 unset password
+fi
 
 sudo cp -p -- "$jar" "$stage/previous.jar"
 had_env=false; had_override=false
@@ -59,7 +69,7 @@ sudo systemctl start pedidos360
 healthy=false
 for attempt in $(seq 1 40); do
     if curl --noproxy '*' -fsS --max-time 8 http://127.0.0.1:8080/public/productos >/dev/null 2>&1 \
-        && curl --noproxy '*' -fsS --max-time 8 http://127.0.0.1:8080/public/auth/mail-mode | grep -q '"SMTP"'; then
+        && curl --noproxy '*' -fsS --max-time 8 http://127.0.0.1:8080/public/auth/mail-mode | python3 -c 'import json,sys; c=json.load(sys.stdin); sys.exit(0 if c.get("mode")=="SMTP" and c.get("passwordResetAvailable") is True else 1)'; then
         healthy=true; break
     fi
     sleep 3
