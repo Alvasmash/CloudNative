@@ -42,6 +42,15 @@ class Pedidos360SecurityAndApiTests {
     @Autowired
     private MockMvc mockMvc;
 
+    @Test
+    void kafkaManagementRequiresAdminAndReportsWhenDisabled() throws Exception {
+        String path = "/api/admin/kafka/topics";
+        mockMvc.perform(get(path)).andExpect(status().isUnauthorized());
+        mockMvc.perform(get(path).with(jwt())).andExpect(status().isForbidden());
+        mockMvc.perform(get(path).with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+            .andExpect(status().isServiceUnavailable());
+    }
+
     // Configuracion de prueba para no requerir conexion real a internet con Azure AD durante los tests
     @TestConfiguration
     static class TestSecurityConfig {

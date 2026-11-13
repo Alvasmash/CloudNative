@@ -9,7 +9,12 @@ interface KafkaEvent {
   partition: number;
   offset: number;
 }
-interface KafkaStatus { status: 'CONNECTED' | 'DISCONNECTED' | 'DISABLED'; topic: string; events: KafkaEvent[]; retentionDays?: number; }
+interface KafkaStatus {
+  status: 'CONNECTED' | 'DISCONNECTED' | 'DISABLED';
+  topic: string;
+  salesTopic?: string;
+  events: KafkaEvent[];
+}
 
 @Component({
   selector: 'app-kafka-monitor',
@@ -30,7 +35,8 @@ interface KafkaStatus { status: 'CONNECTED' | 'DISCONNECTED' | 'DISABLED'; topic
           <span class="connection" [class.connected]="stream.status === 'CONNECTED'">
             <span aria-hidden="true">●</span> {{ stream.status === 'CONNECTED' ? 'Broker conectado' : stream.status === 'DISABLED' ? 'Kafka desactivado' : 'Broker sin conexión' }}
           </span>
-          @if (stream.topic) { <code>{{ stream.topic }}</code><span class="muted">Retención: {{ stream.retentionDays }} días</span> }
+          @if (stream.topic) { <span>Auditoría <code>{{ stream.topic }}</code></span> }
+          @if (stream.salesTopic) { <span>Analítica <code>{{ stream.salesTopic }}</code></span> }
         </div>
         @if (stream.status === 'DISCONNECTED') { <p class="notice">No se pudo conectar con el broker de Kafka de este servidor.</p> }
         @if (stream.events.length) {

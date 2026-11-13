@@ -1,5 +1,7 @@
 package cl.duoc.pedidos360;
 
+import java.util.Arrays;
+import cl.duoc.analytics.SalesAnalyticsApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -17,6 +19,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Pedidos360BackendApplication {
 
     public static void main(String[] args) {
+        if (Arrays.asList(args).contains("--analytics")) {
+            SalesAnalyticsApplication.run(args);
+            return;
+        }
         SpringApplication.run(Pedidos360BackendApplication.class, args);
     }
 }

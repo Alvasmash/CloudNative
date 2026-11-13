@@ -2,6 +2,7 @@ package cl.duoc.pedidos360;
 
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
+import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -17,7 +18,7 @@ class KafkaEventStreamTests {
     @SuppressWarnings("unchecked")
     private final KafkaTemplate<String, String> kafka = mock(KafkaTemplate.class);
     private final ObjectMapper json = new ObjectMapper().registerModule(new JavaTimeModule());
-    private final KafkaEventStream stream = new KafkaEventStream(kafka, json, "pedidos.eventos", "localhost:9092");
+    private final KafkaEventStream stream = new KafkaEventStream(kafka, json, "pedidos.eventos", "pedidos.ventas", 2, mock(Admin.class));
     private PedidoLifecycleEvent event(int id) {
         return new PedidoLifecycleEvent("event-" + id, "PEDIDO_CREADO", (long) id, "PED-" + id, "PENDIENTE", 8990.0, Instant.now());
     }
@@ -27,6 +28,16 @@ class KafkaEventStreamTests {
             .thenReturn(CompletableFuture.<SendResult<String, String>>failedFuture(new RuntimeException("broker offline")));
         assertDoesNotThrow(() -> stream.publish(event(42)));
         verify(kafka).send(eq("pedidos.eventos"), eq("42"), contains("PEDIDO_CREADO"));
+        verify(kafka).send(eq("pedidos.ventas"), eq("42"), contains("\"totalClp\":8990.0"));
+    }
+
+    @Test void statusChangesOnlyPublishToAudit() {
+        when(kafka.send(anyString(), anyString(), anyString())).thenReturn(
+            CompletableFuture.failedFuture(new RuntimeException("broker offline")));
+        stream.publish(new PedidoLifecycleEvent("update", "ESTADO_ACTUALIZADO", 42L,
+            "PED-42", "ENTREGADO", 8990.0, Instant.now()));
+        verify(kafka).send(eq("pedidos.eventos"), eq("42"), contains("ESTADO_ACTUALIZADO"));
+        verifyNoMoreInteractions(kafka);
     }
 
     @Test void immediateFailureDoesNotEscapePublisher() {

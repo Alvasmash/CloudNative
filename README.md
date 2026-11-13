@@ -17,7 +17,8 @@ Puertos publicados, todos limitados a `127.0.0.1`:
 - Interfaz: http://localhost:4200
 - API: http://localhost:8080/public/health
 - RabbitMQ: http://localhost:15672 y http://localhost:15673 (valores locales de ejemplo: `admin` / `admin123`).
-- Kafka para herramientas locales: `localhost:9092`.
+- Kafka para herramientas locales: `localhost:9092,localhost:9093`.
+- Kafka UI: http://localhost:8081
 
 ## Usuarios y administradores
 
@@ -68,29 +69,54 @@ La interfaz pública usa los mismos componentes, estilos y fotos que la versión
 Necesitas Java 21, Maven y Node.js compatible con Angular 19:
 
 ```powershell
-docker compose up -d rabbit1 rabbit2 kafka
+docker compose up -d --wait rabbit1 rabbit2 kafka kafka2 kafka-ui
 ```
 
-Dentro de `backend`: `mvn spring-boot:run`.
+Dentro de `backend`, define `$env:KAFKA_BOOTSTRAP_SERVERS="localhost:9092,localhost:9093"` y `$env:KAFKA_REPLICAS="2"`, luego ejecuta `mvn spring-boot:run`. Para iniciar también el consumidor en otra terminal, ejecuta `mvn package -DskipTests` y `java -jar target/pedidos360-backend-0.0.1-SNAPSHOT.jar --analytics --spring.kafka.bootstrap-servers=localhost:9092,localhost:9093`.
 Dentro de `frontend`: `npm.cmd ci` y `npm.cmd start`.
 No ejecutes este modo junto con los contenedores de frontend/backend: usan los mismos puertos. La base nativa se guarda en `backend/data/`; Docker usa `backend_data`. Los pedidos y las vinculaciones de administradores son independientes entre esos dos modos.
 
 ## Kafka
 
-RabbitMQ conserva los procesos de cocina, notificación y facturación al crear un pedido. Kafka registra `PEDIDO_CREADO`, `ESTADO_ACTUALIZADO` y `PEDIDO_ELIMINADO`, sin nombre ni correo del cliente en los eventos.
+Compose levanta dos brokers Kafka 3.9 coordinados por ZooKeeper, Kafka UI y el microservicio Spring Boot de analítica. La API de pedidos y el consumidor de ventas corren en procesos separados. El consumidor se inicia con el mismo JAR en modo `--analytics` y procesa los eventos sin conexión a la base de datos.
 
-El broker `pedidos360-local-kafka` funciona en KRaft con un nodo, sin ZooKeeper. El backend usa `kafka:29092` dentro de Docker. El tópico `pedidos.eventos` tiene tres particiones, una réplica y retención de siete días. La clave es el ID del pedido para conservar su orden dentro de una partición. El grupo `pedidos360-auditoria` consume los eventos.
+| Tópico | Publica | Grupo consumidor | Retención |
+| --- | --- | --- | --- |
+| `pedidos.eventos` | Creación, cambios de estado y eliminación | `pedidos360-auditoria` | 7 días |
+| `pedidos.ventas` | Importe y fecha de cada pedido creado | `pedidos360-ventas` | 30 días |
 
-En **Administración → Eventos en Kafka**, **Actualizar eventos** consulta el broker y muestra los últimos 50 eventos recibidos desde que arrancó este backend. Esta lista en memoria se vacía al reiniciar el backend; Kafka conserva sus mensajes y offsets en `kafka_data`.
+Cada tópico tiene tres particiones, dos réplicas en Compose y política `delete`. La clave es el ID del pedido y preserva su orden dentro de la partición de cada tópico. Los grupos independientes pueden repartir hasta tres particiones entre instancias. El productor usa JSON, confirmación de las réplicas en sincronía e idempotencia durante los reintentos. Se admite una réplica en sincronía para que el entorno local pueda seguir publicando si se detiene un broker. Los DTO excluyen nombre y correo.
+
+Crea un pedido desde la interfaz como invitado y abre **Kafka UI → Topics** para ver el mismo ID en ambos flujos. **Consumers** permite inspeccionar los grupos, sus particiones y offsets. El consumidor de ventas calcula bruto, neto e IVA y los registra con el identificador y la fecha de la venta. El panel **Administración → Eventos en Kafka** muestra hasta 50 eventos de auditoría recibidos desde que se inició la API.
 
 ```powershell
-docker exec pedidos360-local-kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --describe --topic pedidos.eventos
-docker exec pedidos360-local-kafka /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server localhost:29092 --topic pedidos.eventos --from-beginning --timeout-ms 10000
+docker compose exec kafka kafka-topics --bootstrap-server kafka:29092 --describe --topic pedidos.eventos
+docker compose exec kafka kafka-topics --bootstrap-server kafka:29092 --describe --topic pedidos.ventas
+docker compose exec kafka kafka-consumer-groups --bootstrap-server kafka:29092 --describe --group pedidos360-ventas
+docker compose logs analytics
+docker compose exec rabbit1 rabbitmqctl cluster_status
 ```
 
-La publicación se solicita después del commit en H2. La auditoría es de mejor esfuerzo: si Kafka continúa caído tras los reintentos del productor, el fallo se registra y el pedido guardado sigue válido. No hay outbox ni recuperación automática de esos eventos desde la base. Los mensajes corruptos se descartan con advertencia para que el consumidor continúe.
+La publicación se solicita después del commit. Si Kafka continúa caído tras los reintentos, se registra la publicación fallida y el pedido sigue guardado. Ambos tópicos se publican de forma independiente y no se recuperan desde la base. Los consumidores descartan mensajes inválidos con logs de tópico, partición y offset. Las excepciones de procesamiento se reintentan dos veces. RabbitMQ mantiene los flujos de cocina, notificación y facturación, con sus colas de reintento y DLQ. La notificación y facturación son simulaciones en los logs.
 
-Los consumidores de notificación/facturación simulan esas operaciones en los logs; no envían correos ni emiten documentos fiscales reales.
+La instalación ZooKeeper usa volúmenes nuevos para los brokers. El volumen Kafka anterior de KRaft se conserva por separado y su historial no se migra al iniciar Compose.
+
+### Administración mediante la API
+
+Las rutas bajo `/api/admin/kafka` requieren un token de administrador de Microsoft Entra ID. Kafka UI ofrece administración local desde el navegador.
+
+| Método y ruta relativa | Operación o cuerpo de ejemplo |
+| --- | --- |
+| `GET /topics` | Listar tópicos |
+| `GET /topics/ep5.demo` | Ver configuración, líderes y réplicas |
+| `POST /topics` | `{"name":"ep5.demo","partitions":1,"replicas":2,"retentionMs":86400000,"cleanupPolicy":"delete"}` |
+| `PATCH /topics/ep5.demo/configuration` | `{"retentionMs":172800000}` |
+| `PUT /topics/ep5.demo/partitions` | `{"total":3}` |
+| `DELETE /topics/ep5.demo` | Eliminar un tópico de prueba |
+| `GET /groups` | Listar grupos |
+| `GET /groups/pedidos360-ventas` | Inspeccionar miembros, asignaciones y offsets |
+
+Para conectar un entorno existente define `APP_KAFKA_ENABLED=true` y `SPRING_KAFKA_BOOTSTRAP_SERVERS`. Ajusta `KAFKA_REPLICAS` al número de brokers disponible antes de crear los tópicos. La conexión cloud a PostgreSQL usa las variables descritas en [el backend](backend/README.md).
 
 ## Verificación
 

@@ -42,11 +42,12 @@ describe('Kafka server compatibility', () => {
   it('continues to show real events when the server supports Kafka', fakeAsync(() => {
     const fixture = TestBed.createComponent(KafkaMonitorComponent);
     fixture.detectChanges(); flushMicrotasks();
-    http.expectOne(url).flush({status: 'CONNECTED', topic: 'pedidos.eventos', retentionDays: 7, events: [
+    http.expectOne(url).flush({status: 'CONNECTED', topic: 'pedidos.eventos', salesTopic: 'pedidos.ventas', events: [
       {event: {eventId: 'test-event', type: 'PEDIDO_CREADO', pedidoId: 1, numeroPedido: 'PED-REAL', estado: 'PENDIENTE', occurredAt: '2026-10-29T20:00:00Z'}, partition: 0, offset: 12},
     ]});
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Broker conectado');
+    expect(fixture.nativeElement.textContent).toContain('pedidos.ventas');
     expect(fixture.nativeElement.textContent).toContain('PED-REAL');
     expect(toast.error).not.toHaveBeenCalled();
   }));

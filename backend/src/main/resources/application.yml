@@ -36,7 +36,35 @@ spring:
     init:
       mode: never
 
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    admin:
+      fail-fast: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable.idempotence: true
+        max.block.ms: 1000
+        request.timeout.ms: 3000
+        delivery.timeout.ms: 10000
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: record
+
 app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+    topic: ${KAFKA_AUDIT_TOPIC:pedidos.eventos}
+    sales-topic: ${KAFKA_SALES_TOPIC:pedidos.ventas}
+    replicas: ${KAFKA_REPLICAS:1}
+    audit-group: ${KAFKA_AUDIT_GROUP:pedidos360-auditoria}
+    sales-group: ${KAFKA_SALES_GROUP:pedidos360-ventas}
   accounts:
     frontend-url: ${FRONTEND_URL:http://localhost:4200}
     hash-routing: ${FRONTEND_HASH_ROUTING:false}
