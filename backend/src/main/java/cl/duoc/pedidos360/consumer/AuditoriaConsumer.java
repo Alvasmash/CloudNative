@@ -11,9 +11,10 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import com.rabbitmq.client.Channel;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cl.duoc.pedidos360.config.RabbitMQConstants;
-import cl.duoc.pedidos360.event.PedidoCreadoEvent;
 
 /**
  * =========================================================================
@@ -26,21 +27,31 @@ import cl.duoc.pedidos360.event.PedidoCreadoEvent;
 public class AuditoriaConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(AuditoriaConsumer.class);
+    private final ObjectMapper json;
+
+    public AuditoriaConsumer(ObjectMapper json) {
+        this.json = json;
+    }
 
     @RabbitListener(
             queues = RabbitMQConstants.QUEUE_AUDITORIA,
             containerFactory = "rabbitListenerContainerFactory"
     )
     public void registrarAuditoria(
-            PedidoCreadoEvent event,
             Message message,
             Channel channel,
             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
 
-        log.info("[AUDITORIA] Evento capturado: Pedido {} por cliente '{}' - Total: ${}",
-                event != null ? event.getNumeroPedido() : "N/A",
-                event != null ? event.getClienteNombre() : "N/A",
-                event != null ? event.getTotal() : 0);
+        JsonNode event;
+        try {
+            event = json.readTree(message.getBody());
+        } catch (IOException invalidJson) {
+            log.warn("[AUDITORIA] JSON inválido deliveryTag={}", deliveryTag);
+            channel.basicReject(deliveryTag, false);
+            return;
+        }
+        log.info("[AUDITORIA] routingKey={} pedido={}", message.getMessageProperties().getReceivedRoutingKey(),
+            event == null ? "" : event.path("numeroPedido").asText());
 
         channel.basicAck(deliveryTag, false);
     }
